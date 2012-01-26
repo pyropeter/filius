@@ -1,0 +1,68 @@
+<html>
+  <head>
+    <base href="file:bilder">
+    <style type="text/css">
+	  body { font-family:Helvetica,Arial,sans-serif;	}
+      ol { margin-left: 15px;	}
+      ul { margin-left: 15px;	}
+      h2 {margin-bottom: 0px; margin-top: 20px}
+    </style>
+  </head>
+  <body>
+	<h1>Entwurfsmodus</h1>
+
+	<h2>1. Simulation eines Rechnernetzes starten</h2>
+
+      <p>Um ein erstelltes virtuelle Netzwerk zu nutzen, muss vom Entwurfsmodus in
+		den Simulationsmodus gewechselt werden. Das erfolgt &uuml;ber die entsprechende
+		Schaltfl&auml;che in der Zeile am oberen Fensterrand.
+        <center><img src="hilfe/gfx/aktionsmodus.png"></center> </p>
+
+	<h2>2. Rechnernetz aufbauen</h2>
+      <p>Komponenten k&ouml;nnen hinzugef&uuml;gt werden, indem sie
+		mit gedr&uuml;ckter Maustaste auf die Entwurfsfl&auml;che gezogen werden
+		<center><img src="hilfe/gfx/draganddrop.gif"></center>	</p>
+	  <p> Gel&ouml;scht werden die Komponenten &uuml;ber das Kontextmen&uuml; (unter
+	    Linux und Windows: rechte Maustaste &uuml;ber der Komponente bet&auml;tigen).
+      <p> Verbindungen werden erstellt, indem die Komponente Kabel ausgew&auml;hlt
+		wird (per Mausklick oder Tastenkombination ALT+1) und anschlie&szlig;end die zu verbindenen Komponenten nacheinander mit
+		dem Cursor ausgew&auml;hlt werden.
+		<center><img src="hilfe/gfx/verkabeln.png"></center> </p>
+      <p> Verbindungen werden gel&ouml;scht, indem im Kontextmen&uuml; einer angeschlossenen
+        Komponente der Eintrag zum L&ouml;schen aller Verbindungen ausgew&auml;hlt wird. </p>
+
+	<h2>3. Komponenten konfigurieren</h2>
+      <p> Zur Konfiguration der Komponenten wird durch einen Doppelklick auf die jeweilige
+        Komponente ein Eingabebereich am unteren Bildschirmrand ge&ouml;ffnet. Der Name kann
+        beliebig gew&auml;hlt werden. Diese Einstellung hat keinen Einfluss auf die Funktion
+        des Programms. Alle anderen Einstellungen beeinflussen den Datenaustausch und damit
+        die korrekte Funktionsweise des	Rechnernetzes. </p>
+
+      <p><b>Rechner/Notebook</b>: Alternativ zur manuellen IP-Konfiguration kann
+        ausgew&auml;hlt werden,	dass die Einstellungen durch einen DHCP-Server bezogen
+        werden sollen. Dazu muss auf einem Rechner im lokalen Rechnernetz der
+        DHCP-Server aktiviert und konfiguriert werden. </p>
+
+      <p> <b>Vermittlungsrechner</b>: Ein Vermittlungsrechner verf&uuml;gt &uuml;ber
+        mehrere	Netzwerkkarten, die manuell konfiguriert werden m&uuml;ssen. Au&szlig;erdem
+        wird hier die Weiterleitung von IP-Paketen zwischen verschiedenen Rechnernetzen
+        mit dem Gateway und der Weiterleitungstabelle eingestellt. Eine Firewall kann &uuml;ber
+        die entsprechende Schaltfl&auml;che aktiviert und konfiguriert werden. Das ist aber
+        auch noch im Simulationsmodus &uuml;ber eine Web-Schnittstelle m&ouml;glich. </p>
+
+      <p> <b>Switch</b>: Der Switch verbindet Komponenten in einem lokalen Rechnernetz
+        und erfordert f&uuml;r die Funktion keine weiteren Einstellungen. </p>
+
+      <p> <b>Modem</b>: Mit dem Modem k&ouml;nnen die in Filius erstellten virtuellen
+        Rechnernetze auf verschiedenen realen Rechnern miteinander verbunden werden. Dazu
+        muss auf einem Rechner ein Filius-Modem auf eingehende Verbindungen warten und von
+        einem anderen Rechner eine Verbindung mit Hilfe der IP-Adresse des realen Zielrechners
+        aufgebaut werden. </p>
+
+    <h2> 4. Eigene Anwendungen erstellen </h2>
+      <p> Mit dem Assistenten zur Software-Erstellung ist es m&ouml;glich, eigene Programme
+        mit Java zu erstellen und zu ver&auml;ndern. Der Assistent wird &uuml;ber die
+        entsprechende Schaltfl&auml;che am oberen Fensterrand gestartet.
+        <center><img src="hilfe/gfx/button_wizard.png"></center>	</p>
+  </body>
+</html>

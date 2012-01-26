@@ -1,0 +1,62 @@
+<html>
+  <head>
+    <base href="file:bilder">
+    <style type="text/css">
+	  body { font-family:Helvetica,Arial,sans-serif;	}
+      ol { margin-left: 15px;	}
+      ul { margin-left: 15px;	}
+      h2 {margin-bottom: 0px; margin-top: 20px}
+    </style>
+  </head>
+  <body>
+	<h1>Design Mode</h1>
+
+	<h2>1. Starting Computer Network Simulation </h2>
+
+      <p>In order to use the previously built computer network it is necessary to switch
+        to the simulation mode. The button is located at the upper panel of the window.
+        <center><img src="hilfe/gfx/aktionsmodus.png"></center> </p>
+
+	<h2>2. Construct a Computer Network </h2>
+      <p> Use the mouse to drag and drop the components from the left panel to the
+        whiteboard.
+		<center><img src="hilfe/gfx/draganddrop.gif"></center>	</p>
+	  <p> Use the context menu of the component to delete the icon (Linux and Windows: press
+	    right mouse button over the component).
+      <p> Connect stations by selecting the cable icon (using the mouse or shortcut ALT+1) and then press the mouse
+        button on two components.
+		<center><img src="hilfe/gfx/verkabeln.png"></center> </p>
+      <p> Use the context menu of the component to delete all connections to this station. </p>
+
+	<h2>3. Configure Components </h2>
+      <p> Select the component with a double-click to configure its properties on the
+        lower panel of the window which will be opened. Select any name for the component.
+        This property does not influence the functionality of the network simulation. </p>
+
+      <p><b>Host/Notebook</b>: Besides the manual configuration of IP properties it is possible
+        that the IP configuration is provided by a DHCP server. In order to use this
+        functionality one of the hosts within the local computer network must provide
+        the DHCP server.</p>
+
+      <p> <b>Router</b>: The Router provides several Network Interface Controller (NIC). This
+        NICs must be manually configured. Furthermore IP forwarding is configured by the default
+        gateway and the forwarding table. And it is possible to activate and configure a
+        firewall. The configuration of the firewall can be processed additionally when the
+        simulation mode is selected using a web-interface. </p>
+
+      <p> <b>Switch</b>: The switch is used to connect components within a local computer
+        network. This component does not require any configuration. </p>
+
+      <p> <b>Modem</b>: The modem is used to connect virtual networks built within Filius
+        which are located at two different real machines. For this purpose it is necessary to
+        configure the modem at one machine to wait for incoming connetion requests. The modem
+        located at the second machine must initialize the connection and therefore the real
+        IP address of the first machine must be configured. </p>
+
+    <h2> 4. Programming Individual Software Components </h2>
+      <p> The software assistant provides a simple interface to programme and modify
+        individual software components which can be used in the simulation mode. The
+        assistant is started using the icon at the upper panel of the window.
+        <center><img src="hilfe/gfx/button_wizard.png"></center>	</p>
+  </body>
+</html>

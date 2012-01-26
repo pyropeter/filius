@@ -1,0 +1,146 @@
+<html>
+  <head>
+    <title>Router Firewall Configuration</title>
+  </head>
+
+  <body>
+
+    <form action=":action_pfad:" method="POST">
+    <center> <table border="0" cellspacing="5" width="400"> <tr><td> <h2>Router Firewall Configuration</h2> </td></tr><tr><td>
+      <table bgcolor="#E0E0E0" border="0" width="100%" cellpadding="5">
+        <tr>
+          <td>
+            <h3>Monitored Network Interfaces:</h3>
+          </td>
+        </tr>
+        <tr><td align="center"><table border="0" cellpadding="5">
+:nic_activation:
+      </table></td></tr>
+        <tr>
+          <td align="center"><input type="submit" value="Save"></td>
+        </tr>
+      </table>
+
+    </td></tr><tr><td>
+
+    <!-- Konfiguration der Empfaenger-Regeln -->
+      <table  border="0" bgcolor="#E0E0E0" width="100%" cellpadding="5">
+        <tr>
+          <td colspan="4">
+            <h3>Blocked Recipients (IP Addresses):</h3>
+          </td>
+        </tr>
+        <tr>
+          <td>lower border: </td>
+          <td><input name="empfaenger_untere_grenze" type="text" size="12" maxlength="15"></td>
+
+          <td>upper border: </td>
+          <td><input name="empfaenger_obere_grenze" type="text" size="12" maxlength="15"></td>
+        </tr>
+        <tr>
+          <td>remove rule by number: </td>
+          <td> <input name="empfaenger_regel_loeschen" type="text" size="5" maxlength="3">
+        </tr>
+        <tr>
+          <td colspan="4" align="center">
+            <input type="submit" value="Save Changes">
+          </td>
+        </tr>
+        <tr>
+          <td colspan="4">
+            <table border="1" width="100%">
+              <tr>
+                <th width="20%">No.</th>
+                <th width="40%">Lower Border</th>
+                <th width="40%">Upper Border</th>
+              </tr>
+
+:empfaenger_regeln:
+
+            </table>
+          </td>
+        </tr>
+      </table>
+
+    </td></tr><tr><td>
+
+    <!-- Konfiguration der Absender-Regeln -->
+      <table  border="0" bgcolor="#E0E0E0" width="100%" cellpadding="5">
+        <tr>
+          <td colspan="4">
+            <h3>Blocked Sender (IP Addresses):</h3>
+          </td>
+        </tr>
+        <tr>
+          <td>lower border: </td>
+          <td><input name="absender_untere_grenze" type="text" size="12" maxlength="15"></td>
+
+          <td>upper border: </td>
+          <td><input name="absender_obere_grenze" type="text" size="12" maxlength="15"></td>
+        </tr>
+        <tr>
+          <td>remove rule by number: </td>
+          <td> <input name="absender_regel_loeschen" type="text" size="5" maxlength="3">
+        </tr>
+        <tr>
+          <td colspan="4" align="center">
+            <input type="submit" value="Save Changes">
+          </td>
+        </tr>
+        <tr>
+          <td colspan="4">
+            <table border="1" width="100%">
+              <tr>
+                <th width="20%">No.</th>
+                <th width="40%">Lower Border</th>
+                <th width="40%">Upper Border</th>
+              </tr>
+
+:absender_regeln:
+
+            </table>
+          </td>
+        </tr>
+      </table>
+
+    </td></tr><tr><td>
+
+    <!-- Konfiguration der Port-Regeln -->
+      <table  border="0" bgcolor="#E0E0E0" width="100%" cellpadding="5">
+        <tr>
+          <td colspan="4">
+            <h3>Blocked TCP/UDP Ports:</h3>
+          </td>
+        </tr>
+        <tr>
+          <td>port:</td>
+          <td><input name="port" type="text" size="10" maxlength="10"></td>
+        </tr>
+        <tr>
+          <td>remove rule by number: </td>
+          <td> <input name="port_regel_loeschen" type="text" size="5" maxlength="3">
+        </tr>
+        <tr>
+          <td colspan="4" align="center">
+            <input type="submit" value="Save Changes">
+          </td>
+        </tr>
+        <tr>
+          <td colspan="4">
+            <table border="1" width="100%">
+              <tr>
+                <th width="20%">No.</th>
+                <th width="80%">Port</th>
+              </tr>
+
+:port_regeln:
+
+            </table>
+          </td>
+        </tr>
+      </table>
+
+    </td></tr></table></center>
+    </form>
+  </body>
+</html>

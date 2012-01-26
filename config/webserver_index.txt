@@ -1,0 +1,18 @@
+<html>
+  <head>
+    <title>Standardseite</title>
+  </head>
+  <body bgcolor="#ccccff">
+    <h2 align="center"> FILIUS - Webserver </h2>
+
+    <p>Herzlich Willkommen auf dem Webserver der Anwendung FILIUS!</p>
+
+    <p> Diese Seite wurde automatisch mit der Installation des 
+      Webservers eingerichtet, es lassen sich jedoch auch 
+      eigene Seiten hier unterbringen. </p>
+
+    <p align="center"> <img src="splashscreen-mini.png"> </p>
+
+    <p> http://www.lernsoftware-filius.de </p>
+  </body>
+</html>

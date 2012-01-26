@@ -1,0 +1,146 @@
+<html>
+  <head>
+    <title>Konfiguration der Firewall auf dem Vermittlungsrechner</title>
+  </head>
+
+  <body>
+
+    <form action=":action_pfad:" method="POST">
+	<center> <table border="0" cellspacing="5" width="400"> <tr><td> <h2>Firewall-Konfiguration </h2> </td></tr><tr><td>
+      <table bgcolor="#E0E0E0" border="0" width="100%" cellpadding="5">
+        <tr>
+          <td>
+            <h3>&Uuml;berwachte Netzwerkschnittstellen:</h3>
+          </td>
+        </tr>
+        <tr><td align="center"><table border="0" cellpadding="5">
+:nic_activation:
+      </table></td></tr>
+	    <tr>
+          <td align="center"><input type="submit" value="Speichern"></td>
+        </tr>
+      </table>
+
+    </td></tr><tr><td>
+
+    <!-- Konfiguration der Empfaenger-Regeln -->
+      <table  border="0" bgcolor="#E0E0E0" width="100%" cellpadding="5">
+        <tr>
+          <td colspan="4">
+            <h3>Blockierte Empf&auml;nger (IP-Adressen):</h3>
+          </td>
+        </tr>
+        <tr>
+          <td>untere Grenze: </td>
+          <td><input name="empfaenger_untere_grenze" type="text" size="12" maxlength="15"></td>
+
+          <td>obere Grenze: </td>
+          <td><input name="empfaenger_obere_grenze" type="text" size="12" maxlength="15"></td>
+        </tr>
+        <tr>
+          <td>Regel anhand der lfd. Nummer entfernen: </td>
+          <td> <input name="empfaenger_regel_loeschen" type="text" size="5" maxlength="3">
+        </tr>
+        <tr>
+          <td colspan="4" align="center">
+            <input type="submit" value="&Auml;nderungen speichern">
+          </td>
+        </tr>
+        <tr>
+          <td colspan="4">
+            <table border="1" width="100%">
+              <tr>
+                <th width="20%">lfd. Nr.</th>
+                <th width="40%">untere Grenze</th>
+                <th width="40%">obere Grenze</th>
+              </tr>
+
+:empfaenger_regeln:
+
+            </table>
+          </td>
+        </tr>
+      </table>
+
+    </td></tr><tr><td>
+
+    <!-- Konfiguration der Absender-Regeln -->
+      <table  border="0" bgcolor="#E0E0E0" width="100%" cellpadding="5">
+        <tr>
+          <td colspan="4">
+            <h3>Blockierte Absender (IP-Adressen):</h3>
+          </td>
+        </tr>
+        <tr>
+          <td>untere Grenze: </td>
+          <td><input name="absender_untere_grenze" type="text" size="12" maxlength="15"></td>
+
+          <td>obere Grenze: </td>
+          <td><input name="absender_obere_grenze" type="text" size="12" maxlength="15"></td>
+        </tr>
+        <tr>
+          <td>Regel anhand der lfd. Nummer entfernen: </td>
+          <td> <input name="absender_regel_loeschen" type="text" size="5" maxlength="3">
+        </tr>
+        <tr>
+          <td colspan="4" align="center">
+            <input type="submit" value="&Auml;nderungen speichern">
+          </td>
+        </tr>
+        <tr>
+          <td colspan="4">
+            <table border="1" width="100%">
+              <tr>
+                <th width="20%">lfd. Nr.</th>
+                <th width="40%">untere Grenze</th>
+                <th width="40%">obere Grenze</th>
+              </tr>
+
+:absender_regeln:
+
+            </table>
+          </td>
+        </tr>
+      </table>
+
+    </td></tr><tr><td>
+
+    <!-- Konfiguration der Port-Regeln -->
+      <table  border="0" bgcolor="#E0E0E0" width="100%" cellpadding="5">
+        <tr>
+          <td colspan="4">
+            <h3>Blockierte TCP-/UDP-Ports:</h3>
+          </td>
+        </tr>
+        <tr>
+          <td>Port:</td>
+          <td><input name="port" type="text" size="10" maxlength="10"></td>
+        </tr>
+        <tr>
+          <td>Regel entfernen: </td>
+          <td> <input name="port_regel_loeschen" type="text" size="5" maxlength="3">
+        </tr>
+        <tr>
+          <td colspan="4" align="center">
+            <input type="submit" value="&Auml;nderungen speichern">
+          </td>
+        </tr>
+        <tr>
+          <td colspan="4">
+            <table border="1" width="100%">
+              <tr>
+                <th width="20%">lfd. Nr.</th>
+                <th width="80%">Port</th>
+              </tr>
+
+:port_regeln:
+
+            </table>
+          </td>
+        </tr>
+      </table>
+
+    </td></tr></table></center>
+    </form>
+  </body>
+</html>

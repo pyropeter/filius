@@ -1,0 +1,11 @@
+<html>
+<head>
+<title>Firewall Administration</title>
+</head>
+<h1>Firewall Administration</h1>
+
+<p> <a href="konfig.html">Configuration</a> </p>
+<p> <a href="log.html">Show Log</a> </p>
+
+</body>
+</html>

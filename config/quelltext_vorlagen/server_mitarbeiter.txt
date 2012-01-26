@@ -1,0 +1,46 @@
+package filius.software.clientserver;
+
+import filius.software.transportschicht.Socket;
+
+/**
+ * <p>
+ * In dieser Klasse erfolgt die Verarbeitung von eingehenden Nachrichten an
+ * einen Server.
+ * </p>
+ * <p>
+ * Die Oberklasse <code>ServerMitarbeiter</code> erbt von der Klasse Thread.
+ * In der <code>run()</code>-Methode der Oberklasse wird der Socket auf
+ * eingehende Nachrichten ueberwacht. Sobald eine Nachricht eintrifft, wird
+ * diese an die Methode <code>verarbeiteNachricht(String)</code> zur weiteren
+ * Verarbeitung weiter gegeben. Ausserdem wird dort der Socket automatisch
+ * geschlossen, wenn das Client-Programm den Verbindungsabbau initiiert.
+ * </p>
+ * <p>
+ * In dieser Klasse sollte nur die Methode <code>senden(String)</code> des
+ * Sockets verwendet werden!
+ * </p>
+ */
+public class ServerBausteinMitarbeiter extends ServerMitarbeiter {
+
+	/** Standard-Konstruktor. Wenn der Server auf einem bestimmten Port
+	 * auf eingehende Verbindungen warten soll, muss die Port-Nummer hier mit
+	 * <code>setPort(int)</code> initialisiert werden! */
+	public ServerBausteinMitarbeiter(ServerAnwendung server, Socket socket) {
+		super(server, socket);
+	}
+
+	/**
+	 * Methode, die automatisch aufgerufen wird, wenn eine neue Nachricht
+	 * eintrifft. Hier erfolgt die Verarbeitung der eingehenden Nachricht.
+	 */
+	protected void verarbeiteNachricht(String nachricht) {
+		try {
+			socket.senden(nachricht);
+			server.benachrichtigeBeobachter("<<" + nachricht);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			server.benachrichtigeBeobachter(e.getMessage());
+		}
+	}
+}

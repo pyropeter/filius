@@ -1,0 +1,9 @@
+<html>
+  <head>
+    <title>Fehler :meldung: (:code:)</title>
+  </head>
+  <body>
+    <h1>:meldung:</h1>
+    <p> Es ist ein Fehler aufgetreten (HTTP-Status: :code:) </p>
+  </body>
+</html>

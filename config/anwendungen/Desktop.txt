@@ -1,0 +1,13 @@
+DNS-Server;filius.software.dns.DNSServer;filius.gui.anwendungssicht.GUIApplicationDNSServerWindow;gfx/desktop/icon_dns.png
+E-Mail-Programm;filius.software.email.EmailAnwendung;filius.gui.anwendungssicht.GUIApplicationEmailAnwendungWindow;gfx/desktop/icon_emailprogramm.png
+E-Mail-Server;filius.software.email.EmailServer;filius.gui.anwendungssicht.GUIApplicationEmailServerWindow;gfx/desktop/icon_emailserver.png
+Datei-Explorer;filius.software.lokal.FileExplorer;filius.gui.anwendungssicht.GUIApplicationFileExplorerWindow;gfx/desktop/icon_filebrowser.png
+Gnutella;filius.software.dateiaustausch.PeerToPeerAnwendung;filius.gui.anwendungssicht.GUIApplicationPeerToPeerAnwendungWindow;gfx/desktop/icon_peertopeer.png
+Terminal;filius.software.lokal.Terminal;filius.gui.anwendungssicht.GUIApplicationTerminalWindow;gfx/desktop/icon_terminal.png
+Text-Editor;filius.software.lokal.TextEditor;filius.gui.anwendungssicht.GUIApplicationTextEditorWindow;gfx/desktop/icon_texteditor.png
+Webbrowser;filius.software.www.WebBrowser;filius.gui.anwendungssicht.GUIApplicationWebBrowserWindow;gfx/desktop/icon_browser.png
+Web-Server;filius.software.www.WebServer;filius.gui.anwendungssicht.GUIApplicationWebServerWindow;gfx/desktop/icon_webserver.png
+Echo-Server;filius.software.clientserver.ServerBaustein;filius.gui.anwendungssicht.GUIApplicationServerBausteinWindow;gfx/desktop/icon_serverbaustein.png
+Echo-Client;filius.software.clientserver.ClientBaustein;filius.gui.anwendungssicht.GUIApplicationClientBausteinWindow;gfx/desktop/icon_clientbaustein.png
+Firewall;filius.software.firewall.Firewall;filius.gui.anwendungssicht.GUIApplicationFirewallWindow;gfx/desktop/icon_firewall.png
+Bildbetrachter;filius.software.lokal.ImageViewer;filius.gui.anwendungssicht.GUIApplicationImageViewerWindow;gfx/desktop/icon_imageviewer.png
