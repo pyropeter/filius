@@ -28,8 +28,6 @@ package filius.software.dhcp;
 import java.util.StringTokenizer;
 import java.util.ListIterator;
 
-import com.sun.tools.javac.resources.javac;
-
 import filius.Main;
 import filius.exception.VerbindungsException;
 import filius.gui.GUIContainer;
