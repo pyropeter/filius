@@ -1,0 +1,12 @@
+# kompillierte java-klassen:
+*.class
+
+# submakefile mit abhängigkeiten:
+Makefile.depends
+
+# verzeichnis mit fremdsoftware:
+lib/
+
+# vim-auslagerungsdateien:
+*.swp
+

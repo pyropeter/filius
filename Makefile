@@ -1,25 +1,49 @@
 SHELL = /bin/sh
+.SUFFIXES:
+.SUFFIXES: .java .class
 
-LIBS = lib/jna.jar
-# How does one substitute spaces with colons?
-# I certainly have no idea...
+empty := 
+space := $(empty) $(empty)
+
+SRCS = $(shell find src/ -type f -name '*.java')
+OBJS = $(SRCS:.java=.class)
+
+LIBS = lib/jna.jar lib/htmlparser.jar
+CLASSPATH = $(subst $(space),:,$(LIBS))
 
 .PHONY: build run clean
+.PRECIOUS: $(LIBS) lib/htmlparser.zip
 
-build:	$(LIBS)
-	mkdir -p bin
-	javac -classpath lib/jna.jar \
-		-sourcepath src \
-		-d bin/ \
-		src/filius/Main.java
+test:	build
+	java -cp $(CLASSPATH):src filius.Main -v
 
-run:	build
-	java -cp lib/jna.jar:bin:src filius.Main
+build:	Makefile.depends $(LIBS) $(OBJS)
+
+.java.class:
+	javac -classpath $(CLASSPATH):src $<
 
 clean:
-	$(RM) -r bin/
+	$(RM) $(OBJS) Makefile.depends
 
 lib/jna.jar:
 	mkdir -p lib
 	wget -O lib/jna.jar 'https://github.com/downloads/twall/jna/jna.jar'
+
+lib/htmlparser.zip:
+	mkdir -p lib
+	wget -O lib/htmlparser.zip "http://sourceforge.net/projects/\
+	htmlparser/files/htmlparser/1.6/htmlparser1_6_20060610.zip"
+
+lib/htmlparser.jar: lib/htmlparser.zip
+	unzip -p lib/htmlparser.zip \
+		htmlparser1_6/lib/htmlparser.jar > lib/htmlparser.jar
+
+Makefile.depends:
+	for file in $(SRCS); do \
+		echo -n "$$file" | sed 's/^src/bin/; s/.java$$/.class: /' ;\
+		grep '^import filius' "$$file" | \
+			sed 's!^import !src/!; s!\.!/!g; s!;$$!.class!' | \
+			tr '\n' ' ' ;\
+		echo ; \
+	done | grep -v ': $$' > Makefile.depends
 
