@@ -646,7 +646,7 @@ public class Terminal extends ClientAnwendung implements I18n {
 		long timeStart, timeDiff;
 		benachrichtigeBeobachter(new Boolean(true));   // inform about a multiple data transmission to the observer
 		benachrichtigeBeobachter("PING "+args[0]+" ("+destIp+")");
-		int sendNumPackets = 42;		// how many ping requests to be sent; adjust here!
+		int sendNumPackets = 1;		// how many ping requests to be sent; adjust here!
 		
 		int receivedReplies = 0;
 		for (int num=0; num<sendNumPackets; num++) {

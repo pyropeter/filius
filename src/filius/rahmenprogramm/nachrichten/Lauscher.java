@@ -362,11 +362,22 @@ public class Lauscher implements I18n {
 					neuerEintrag[3] = icmpPaket.getZielIp();
 					neuerEintrag[4] = ICMP;
 					neuerEintrag[5] = PROTOKOLL_SCHICHTEN[1];
-					if(icmpPaket.getIcmpType() == 8) {  // Echo Request
-						neuerEintrag[6] = "ICMP Echo Request (ping)";
-					}
-					else {
-						neuerEintrag[6] = "ICMP Echo Reply (pong)";
+					switch (icmpPaket.getIcmpType()) {
+						case 0:
+							neuerEintrag[6] = "ICMP Echo Reply (pong)";
+							break;
+						case 8:
+							neuerEintrag[6] = "ICMP Echo Request (ping)";
+							break;
+						case 11:
+							neuerEintrag[6] = "ICMP Time Exeeded (poof)";
+							break;
+						default:
+							neuerEintrag[6] = "ICMP unknown: " +
+								icmpPaket.getIcmpType() + " / " +
+								icmpPaket.getIcmpCode();
+							break;
+
 					}
 
 					daten.addElement(neuerEintrag);

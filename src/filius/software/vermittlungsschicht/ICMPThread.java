@@ -92,9 +92,15 @@ public class ICMPThread extends ProtokollThread {
 		IcmpPaket icmpPaket = (IcmpPaket) datenEinheit;
 
 		icmpPaket.setTtl(icmpPaket.getTtl()-1);
-		if(icmpPaket.getIcmpType()==0 &&    // it's an ICMP echo reply packet
-			(icmpPaket.getZielIp().equals(IP.LOCALHOST) || 
-			 icmpPaket.getZielIp().equals(((InternetKnotenBetriebssystem) vermittlung.holeSystemSoftware()).holeIPAdresse()))) {
+		if ((
+				icmpPaket.getZielIp().equals(IP.LOCALHOST) || 
+				icmpPaket.getZielIp().equals(((InternetKnotenBetriebssystem)
+					vermittlung.holeSystemSoftware()).holeIPAdresse()))
+			&& (
+				icmpPaket.getIcmpType() == 0 ||
+				icmpPaket.getIcmpType() == 11)) {
+			// Paket wurde an diesen Rechner gesendet, und ist ein
+			// ICMP Echo Reply oder ein ICMP Time Exceeded
 			synchronized(rcvdPackets) {
 				rcvdPackets.add(icmpPaket);
 				rcvdPackets.notify();
@@ -116,7 +122,7 @@ public class ICMPThread extends ProtokollThread {
 		Main.debug.println("INVOKED ("+this.hashCode()+", T"+this.getId()+") "+getClass()+" (ICMPThread), startSinglePing("+destIp+","+seqNr+")");
 		int resultTTL=-20;   // return ttl field of received echo reply packet
 		
-		IcmpPaket sentIcmpPaket = vermittlung.sendEchoRequest(destIp, seqNr);
+		vermittlung.sendEchoRequest(destIp, seqNr);
 		synchronized(rcvdPackets) {
 			try {
 				rcvdPackets.wait(Verbindung.holeRTT());
@@ -130,8 +136,8 @@ public class ICMPThread extends ProtokollThread {
 			else {
 				Main.debug.println("DEBUG ("+this.hashCode()+", T"+this.getId()+") "+getClass()+" (ICMPThread), startSinglePing, reply in queue");
 				IcmpPaket rcvdIcmpPaket = rcvdPackets.removeFirst();
-				if(rcvdIcmpPaket != null && !(sentIcmpPaket.getZielIp().equals(rcvdIcmpPaket.getQuellIp())
-				  && sentIcmpPaket.getSeqNr() == rcvdIcmpPaket.getSeqNr())) {
+				if (rcvdIcmpPaket != null && !(destIp.equals(rcvdIcmpPaket.getQuellIp())
+				  && seqNr == rcvdIcmpPaket.getSeqNr() && rcvdIcmpPaket.getIcmpType() == 0)) {
 					throw new java.util.concurrent.TimeoutException("Destination Host Unreachable");  // not absolutely correct, but who cares...
 				}
 				resultTTL = rcvdIcmpPaket.getTtl(); 

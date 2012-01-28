@@ -79,124 +79,57 @@ public class ICMP extends VermittlungsProtokoll implements I18n {
 		LinkedList<IcmpPaket> icmpPakete = ((InternetKnotenBetriebssystem) holeSystemSoftware()).holeEthernet().holeICMPPuffer(); 
 		synchronized(icmpPakete) {
 			icmpPakete.add(icmpPacket);
-//			Main.debug.println("DEBUG ("+this.hashCode()+") "+getClass()+" (Ethernet), placeLocalICMPPacket, ICMP packet="+(icmpPakete.getFirst().toString()));
 			icmpPakete.notify();
 		}
 	}
 	
 
 	/** Hilfsmethode zum Versenden eines ICMP Echo Requests */
-	public IcmpPaket sendEchoRequest(String destIp, int seqNr) {
-		Main.debug.println("INVOKED ("+this.hashCode()+") "+getClass()+" (ICMP), sendEchoRequest("+destIp+","+seqNr+")");
-		ListIterator it;
-		IcmpPaket icmpPaket;
-		String ipAdresse, netzmaske, mac;
-		NetzwerkInterface nic;
-
-		icmpPaket = new IcmpPaket();
-		icmpPaket.setProtokollTyp(EthernetFrame.IP);    // ICMP type is equal to IP, since ICMP actually is part of IP!
-		icmpPaket.setQuellIp(((InternetKnotenBetriebssystem) holeSystemSoftware()).holeIPAdresse());
-		icmpPaket.setQuellMacAdresse(((InternetKnotenBetriebssystem) holeSystemSoftware()).holeMACAdresse());
-		icmpPaket.setZielIp(destIp);
-		icmpPaket.setIcmpType(8);
-		icmpPaket.setIcmpCode(0);
-		icmpPaket.setTtl(64);
-		icmpPaket.setSeqNr(seqNr);
-
-		it = ((InternetKnoten) holeSystemSoftware().getKnoten())
-				.getNetzwerkInterfaces().listIterator();
-
-		if(destIp.equals(IP.LOCALHOST)) {
-			//Main.debug.println("DEBUG: sendEchoRequest to localhost IP");
-			placeLocalICMPPacket(icmpPaket);
-			return icmpPaket;
-		}
-		else {
-			InternetKnotenBetriebssystem bs = (InternetKnotenBetriebssystem) holeSystemSoftware();
-			String[] routingEintrag = bs.getWeiterleitungstabelle().holeWeiterleitungsZiele(icmpPaket.getZielIp());
-
-			if (routingEintrag != null) {
-				String gateway = routingEintrag[0];
-				String schnittstelle = routingEintrag[1];
-
-				// Damit Pakete nicht in Zyklen gesendet werden
-				// wird hier die TTL ueberprueft.
-				// TTL wird dekrementiert beim Empfang eines Pakets
-				if (icmpPaket.getTtl() > 0) {
-					try {
-						return sendeUnicast(icmpPaket, gateway, schnittstelle);
-					}
-					catch (VerbindungsException e) {
-						e.printStackTrace(Main.debug);
-					}
-				}
-			}
-			else {
-				bs.benachrichtigeBeobacher(messages.getString("sw_ip_msg4")
-						+ " \"" + bs.getKnoten().getName() + "\"!\n"
-						+ messages.getString("sw_ip_msg5") + " "
-						+ icmpPaket.getZielIp() + " "
-						+ messages.getString("sw_ip_msg6"));
-			}
-		}
-		return null;
+	public void sendEchoRequest(String destIp, int seqNr) {
+		sendeICMP(8, 0, seqNr, destIp);
 	}
 
 	/** Hilfsmethode zum Versenden eines ICMP Echo Reply */
 	public void sendEchoReply(IcmpPaket rcvPacket) {
-		Main.debug.println("INVOKED ("+this.hashCode()+") "+getClass()+" (ICMP), sendEchoReply("+rcvPacket.toString()+")");
-		ListIterator it;
-		IcmpPaket icmpPaket;
-		String ipAdresse, netzmaske, mac;
-		NetzwerkInterface nic;
+		sendeICMP(0, 0, rcvPacket.getSeqNr(), rcvPacket.getQuellIp());
+	}
 
-		icmpPaket = new IcmpPaket();
-		icmpPaket.setProtokollTyp(EthernetFrame.IP);    // ICMP type is equal to IP, since ICMP actually is part of IP!
-		icmpPaket.setQuellIp(rcvPacket.getZielIp());
-		icmpPaket.setQuellMacAdresse(rcvPacket.getZielMacAdresse());
-		icmpPaket.setZielIp(rcvPacket.getQuellIp());
-		icmpPaket.setIcmpType(0);
-		icmpPaket.setIcmpCode(0);
-		icmpPaket.setTtl(64);
-		icmpPaket.setSeqNr(rcvPacket.getSeqNr());
+	public void sendeICMP(int typ, int code, String zielIP) {
+		sendeICMP(typ, code, 0, zielIP);
+	}
 
-		it = ((InternetKnoten) holeSystemSoftware().getKnoten())
-				.getNetzwerkInterfaces().listIterator();
+	public void sendeICMP(int typ, int code, int seqNr, String zielIP) {
+		sendeICMP(typ, code, 64, seqNr, zielIP);
+	}
 
-		if(rcvPacket.getZielIp().equals(IP.LOCALHOST)) {
-			//Main.debug.println("DEBUG: sendEchoReply to localhost IP");
+	public void sendeICMP(int typ, int code, int ttl, int seqNr, String zielIP) {
+		IcmpPaket icmpPaket = new IcmpPaket();
+		icmpPaket.setProtokollTyp(EthernetFrame.IP);
+		icmpPaket.setQuellIp(((InternetKnotenBetriebssystem)
+					holeSystemSoftware()).holeIPAdresse());
+		icmpPaket.setQuellMacAdresse(((InternetKnotenBetriebssystem)
+					holeSystemSoftware()).holeMACAdresse());
+		icmpPaket.setZielIp(zielIP);
+		icmpPaket.setIcmpType(typ);
+		icmpPaket.setIcmpCode(code);
+		icmpPaket.setSeqNr(seqNr);
+		icmpPaket.setTtl(ttl);
+
+		if (zielIP.equals(IP.LOCALHOST)) {
 			placeLocalICMPPacket(icmpPaket);
-		}
-		else {
-			//Main.debug.println("DEBUG: sendEchoReply, non-local destination IP");
-			ipAdresse = icmpPaket.getQuellIp();
+		} else {
+			InternetKnotenBetriebssystem bs = (InternetKnotenBetriebssystem)
+					holeSystemSoftware();
+			String[] route = bs.getWeiterleitungstabelle()
+					.holeWeiterleitungsZiele(zielIP);
 
-					InternetKnotenBetriebssystem bs = (InternetKnotenBetriebssystem) holeSystemSoftware();
-					String[] routingEintrag = bs.getWeiterleitungstabelle().holeWeiterleitungsZiele(icmpPaket.getZielIp());
-
-					if (routingEintrag != null) {
-						String gateway = routingEintrag[0];
-						String schnittstelle = routingEintrag[1];
-
-						// Damit Pakete nicht in Zyklen gesendet werden
-						// wird hier die TTL ueberprueft.
-						// TTL wird dekrementiert beim Empfang eines Pakets
-						if (icmpPaket.getTtl() > 0) {
-							try {
-								sendeUnicast(icmpPaket, gateway, schnittstelle);
-							}
-							catch (VerbindungsException e) {
-								e.printStackTrace(Main.debug);
-							}
-						}
-					}
-					else {
-						bs.benachrichtigeBeobacher(messages.getString("sw_ip_msg4")
-								+ " \"" + bs.getKnoten().getName() + "\"!\n"
-								+ messages.getString("sw_ip_msg5") + " "
-								+ icmpPaket.getZielIp() + " "
-								+ messages.getString("sw_ip_msg6"));
-					}
+			if (route != null) {
+				try {
+					sendeUnicast(icmpPaket, route[0], route[1]);
+				} catch (VerbindungsException e) {
+					// ICMP ist optional...
+				}
+			}
 		}
 	}
 	
@@ -215,54 +148,54 @@ public class ICMP extends VermittlungsProtokoll implements I18n {
 	 *            muss
 	 * @throws VerbindungsException
 	 */
-	private IcmpPaket sendeUnicast(IcmpPaket paket, String gateway,
+	private void sendeUnicast(IcmpPaket paket, String gateway,
 			String schnittstelle) throws VerbindungsException {
-		Main.debug.println("INVOKED ("+this.hashCode()+") "+getClass()+" (ICMP), sendeUnicast("+paket.toString()+","+gateway+","+schnittstelle+")");
-		InternetKnoten knoten;
-		NetzwerkInterface nic;
-		InternetKnotenBetriebssystem bs;
-		String netzmaske;
-		String zielMacAdresse;
+		InternetKnoten knoten = (InternetKnoten)holeSystemSoftware().getKnoten();
+		NetzwerkInterface nic = knoten.getNetzwerkInterfaceByIp(schnittstelle);
+		String netzmaske = nic.getSubnetzMaske();
 
-		knoten = (InternetKnoten) holeSystemSoftware().getKnoten();
-		bs = (InternetKnotenBetriebssystem) holeSystemSoftware();
-
-		nic = (NetzwerkInterface) knoten
-				.getNetzwerkInterfaceByIp(schnittstelle);
-		netzmaske = nic.getSubnetzMaske();
-
-		// adressierter Knoten befindet sich im lokalen Rechnernetz
 		if (gleichesRechnernetz(paket.getZielIp(), schnittstelle, netzmaske)) {
-			//Main.debug
-					//.println("Vermittlung: Ziel-Adresse im lokalen Rechnernetz");
-			zielMacAdresse = bs.holeARP().holeARPTabellenEintrag(
-					paket.getZielIp());
+			// adressierter Knoten befindet sich im lokalen Rechnernetz
+			sendeUnicastLokal(paket, paket.getZielIp(), nic);
+		} else {
+			// adressierter Knoten ist ueber Gateway zu erreichen
+			sendeUnicastLokal(paket, gateway, nic);
 		}
-		// adressierter Knoten ist ueber Gateway zu erreichen
-		else {
-			//Main.debug.println("Vermittlung: Ziel-Adresse ueber Gateway zu erreichen");
-			zielMacAdresse = bs.holeARP().holeARPTabellenEintrag(gateway);
-		}
-		paket.setZielMacAdresse(zielMacAdresse);
+	}
 
-		//Main.debug.println("Vermittlung: ZielMacAdresse = " + zielMacAdresse);
+	/**
+	 * Hilfsmethode zum Versenden eines Unicast-Pakets im lokalen Rechnernetz.
+	 *
+	 * @param paket
+	 *            das zu versendende IP-Paket
+	 * @param ziel
+	 *            die Ziel-IP
+	 * @param schnittstelle
+	 *            die Schnittstelle, ueber die das IP-Paket verschickt werden
+	 *            muss
+	 * @throws VerbindungsException
+	 */
+	private void sendeUnicastLokal(IcmpPaket paket, String ziel,
+			NetzwerkInterface nic) throws VerbindungsException {
+		InternetKnotenBetriebssystem bs =
+				(InternetKnotenBetriebssystem)holeSystemSoftware();
+		String zielMacAdresse = bs.holeARP().holeARPTabellenEintrag(ziel);
 
-		// MAC-Adresse konnte bestimmt werden
 		if (zielMacAdresse != null) {
+			// MAC-Adresse konnte bestimmt werden
+			paket.setZielMacAdresse(zielMacAdresse);
 			bs.holeEthernet().senden(paket, nic.getMac(), zielMacAdresse,
 					EthernetFrame.IP);
-		}
-		// Es konnte keine MAC-Adresse fuer den Zielknoten
-		// bzw. fuer das Gateway bestimmt werden
-		else {
+		} else {
+			// Es konnte keine MAC-Adresse fuer den Zielknoten
+			// bzw. fuer das Gateway bestimmt werden
 			throw new VerbindungsException(messages.getString("sw_ip_msg1")
 					+ " " + paket.getZielIp() + " " + messages.getString("sw_ip_msg2")
 					+ " " + zielMacAdresse + " " + messages.getString("sw_ip_msg3")
-					+ " " + gateway);
+					+ " " + ziel);
 		}
-		return paket;
 	}
-	
+
 	/**
 	 * Methode zum Weiterleiten eines ICMP-Pakets. Zunaechst wird geprueft, ob das
 	 * Feld Time-to-Live-Feld (TTL) noch nicht abgelaufen ist (d. h. TTL
@@ -293,7 +226,8 @@ public class ICMP extends VermittlungsProtokoll implements I18n {
 
 			// Wenn das Paket fuer diesen Rechner ist, wird das Paket
 			// weiterverarbeitet
-			if (schnittstelle.equals(IP.LOCALHOST)) {
+			if (schnittstelle.equals(IP.LOCALHOST)
+					&& icmpPaket.getIcmpType() == 8) {
 				// Antwort senden
 				sendEchoReply(icmpPaket);
 			}
@@ -302,6 +236,11 @@ public class ICMP extends VermittlungsProtokoll implements I18n {
 			// TTL wird dekrementiert beim Empfang eines Pakets
 			else if (icmpPaket.getTtl() > 0) {
 				sendeUnicast(icmpPaket, gateway, schnittstelle);
+			}
+			else {
+				// TTL abgelaufen.
+				// ICMP 11/0 Timeout Expired In Transit zuruecksenden
+				sendeICMP(11, 0, icmpPaket.getQuellIp());
 			}
 		}
 		else {
