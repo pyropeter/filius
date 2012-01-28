@@ -45,6 +45,7 @@ import filius.software.transportschicht.Socket;
 import filius.software.transportschicht.SocketSchnittstelle;
 import filius.software.transportschicht.TransportProtokoll;
 import filius.software.vermittlungsschicht.IP;
+import filius.software.vermittlungsschicht.IcmpPaket;
 
 
 /**
@@ -687,6 +688,97 @@ public class Terminal extends ClientAnwendung implements I18n {
 							   + ((int) Math.round((1-(((double) receivedReplies) / ((double) sendNumPackets)))*100))+"% "+messages.getString("sw_terminal_msg48") 
 							   + "\n");
 		return "";
+	}
+
+	/**
+	 * 
+	 * 'traceroute' prints the route packets take to the network host
+	 * (using ICMP Echo Request and ICMP Time Exceeded)
+	 * 
+	 */
+	public String traceroute(String [] args) {
+		if (!numParams(args,1)) {
+			benachrichtigeBeobachter("Benutzung:  traceroute <ziel-IP>");
+			return null;
+		}
+
+		int maxHops = 20;
+
+		// 1.: Hostnamen auflösen
+		String destIP = IP.ipCheck(args[0]);
+		if (destIP == null) {
+			try {
+				filius.software.dns.Resolver res = getSystemSoftware().holeDNSClient();
+				if (res == null) {
+					benachrichtigeBeobachter(
+							"Fehler: Du hast keinen DNS-Server eingestellt.");
+					return null;
+				}
+
+				destIP = res.holeIPAdresse(args[0]);
+
+			} catch (java.util.concurrent.TimeoutException e) {
+				benachrichtigeBeobachter("Fehler: Zeitueberschreitung bei der DNS-Aufloesung.");
+				return null;
+			} catch (Exception e) {
+				e.printStackTrace(filius.Main.debug);
+				benachrichtigeBeobachter("Fehler: Irgendwas ist ganz doll kaputt.");
+				return null;
+			}
+		}
+		if (destIP == null) {
+			benachrichtigeBeobachter("Fehler: Hostname konnte nicht aufgeloest werden. Sorry!");
+			return null;
+		}
+
+
+		benachrichtigeBeobachter(new Boolean(true));
+		benachrichtigeBeobachter("traceroute zu " + args[0] + " (" + destIP + "), " + 
+				maxHops + " Spruenge maximal\n\n");
+
+
+		// 2.: Pings senden und gucken, was alles zurueckkommt
+		IcmpPaket recv = null;
+		int seqNr = 42*23;
+		int fehler = 0;
+		int ttl;
+
+		for (ttl = 1; ttl <= maxHops; ttl++) {
+			benachrichtigeBeobachter(" " + ttl + "    ");
+
+			for (int i = 0; i < 3; i++) {
+				seqNr++;
+				recv = getSystemSoftware().holeICMP().sendProbe(destIP, ttl, seqNr);
+				if (recv != null && recv.getSeqNr() == seqNr) {
+					fehler = 0;
+					break;
+				}
+				fehler++;
+				benachrichtigeBeobachter("* ");
+			}
+
+			if (fehler == 0) {
+				benachrichtigeBeobachter(recv.getQuellIp());
+				if (recv.getIcmpType() == 0) {
+					break;
+				}
+			} else if (fehler > 5) {
+				break;
+			}
+
+			benachrichtigeBeobachter("\n");
+		}
+
+		benachrichtigeBeobachter(new Boolean(false));
+		if (ttl >= maxHops) {
+			benachrichtigeBeobachter("\n\n" + args[0] + " scheint seeehr weit weg zu sein.");
+		} else if (fehler == 0) {
+			benachrichtigeBeobachter("\n\n" + args[0] + " wurde nach " + ttl + " Spruengen erreicht.");
+		} else {
+			benachrichtigeBeobachter("\n\nZu viele Fehler, ich geb' auf.");
+		}
+
+		return null;
 	}
 
 	public void terminalEingabeAuswerten(String enteredCommand, String[] enteredParameters)

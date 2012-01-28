@@ -240,7 +240,7 @@ public class ICMP extends VermittlungsProtokoll implements I18n {
 			else {
 				// TTL abgelaufen.
 				// ICMP 11/0 Timeout Expired In Transit zuruecksenden
-				sendeICMP(11, 0, icmpPaket.getQuellIp());
+				sendeICMP(11, 0, icmpPaket.getSeqNr(), icmpPaket.getQuellIp());
 			}
 		}
 		else {
@@ -255,7 +255,11 @@ public class ICMP extends VermittlungsProtokoll implements I18n {
 	public int startSinglePing(String destIp, int seqNr) throws java.util.concurrent.TimeoutException {
 		return thread.startSinglePing(destIp, seqNr);
 	}
-	
+
+	public IcmpPaket sendProbe(String destIp, int ttl, int seqNr) {
+		return thread.sendProbe(destIp, ttl, seqNr);
+	}
+
 	public ICMPThread getICMPThread() {
 		return thread;
 	}

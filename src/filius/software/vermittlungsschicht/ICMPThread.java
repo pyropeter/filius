@@ -147,5 +147,21 @@ public class ICMPThread extends ProtokollThread {
 		return resultTTL;
 	}
 	
+	public IcmpPaket sendProbe(String destIp, int ttl, int seqNr) {
+		vermittlung.sendeICMP(8, 0, ttl, seqNr, destIp);
+
+		synchronized(rcvdPackets) {
+			try {
+				rcvdPackets.wait(Verbindung.holeRTT());
+			} catch (InterruptedException e) {
+			}
+
+			if (rcvdPackets.size() > 0) {
+				return rcvdPackets.removeFirst();
+			}
+		}
+		return null;
+	}
+	
 
 }
