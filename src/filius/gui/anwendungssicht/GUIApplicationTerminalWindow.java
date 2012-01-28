@@ -153,10 +153,14 @@ public class GUIApplicationTerminalWindow extends GUIApplicationWindow {
 					//Main.debug.println("DEBUG: "+getClass()+", keyPressed ('"+inputField.getText()+" + ENTER') event finished");
 					inputField.setText("");
 			    }
+					if (e.getKeyCode() == 67 && e.getModifiers() == 2) {
+						System.out.println("INTERRUPT");
+						((Terminal) holeAnwendung()).setInterrupt(true);
+					}
             }
 
 			public void keyReleased(KeyEvent arg0) {
-
+				
 			}
 
 			public void keyTyped(KeyEvent arg0) {

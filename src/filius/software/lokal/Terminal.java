@@ -63,6 +63,7 @@ public class Terminal extends ClientAnwendung implements I18n {
 	boolean abfrageVar;
 
 	private DefaultMutableTreeNode aktuellerOrdner;
+	private boolean interrupted = false;
 
 	public void setSystemSoftware(InternetKnotenBetriebssystem bs) {
 		super.setSystemSoftware(bs);
@@ -647,10 +648,10 @@ public class Terminal extends ClientAnwendung implements I18n {
 		long timeStart, timeDiff;
 		benachrichtigeBeobachter(new Boolean(true));   // inform about a multiple data transmission to the observer
 		benachrichtigeBeobachter("PING "+args[0]+" ("+destIp+")");
-		int sendNumPackets = 1;		// how many ping requests to be sent; adjust here!
 		
 		int receivedReplies = 0;
-		for (int num=0; num<sendNumPackets; num++) {
+		int num;
+		for (num=0; !interrupted; num++) {
 			try {
 				timeStart = Calendar.getInstance().getTimeInMillis();
 				/// CAVE: wahrscheinlich hier Queue nötig und blockieren, bis Ergebnis da ist!!!
@@ -663,7 +664,7 @@ public class Terminal extends ClientAnwendung implements I18n {
 							" time="+(Calendar.getInstance().getTimeInMillis()-timeStart)+"ms");
 					receivedReplies++;
 				}
-				if (timeDiff > 0 && num+1<sendNumPackets) { 			
+				if (timeDiff > 0) { 			
 					try {
 				//		Main.debug.println("DEBUG: Terminal wartet für "+timeDiff+"ms");
 						Thread.sleep(timeDiff);
@@ -683,9 +684,9 @@ public class Terminal extends ClientAnwendung implements I18n {
 		benachrichtigeBeobachter(new Boolean(false));   // inform about a multiple data transmission to the observer
 		// print statistics
 		benachrichtigeBeobachter("\n--- "+args[0]+" "+messages.getString("sw_terminal_msg45")+" ---\n"
-							   + sendNumPackets+" "+messages.getString("sw_terminal_msg46")+", "
+							   + num+" "+messages.getString("sw_terminal_msg46")+", "
 							   + receivedReplies+" "+messages.getString("sw_terminal_msg47")+", "
-							   + ((int) Math.round((1-(((double) receivedReplies) / ((double) sendNumPackets)))*100))+"% "+messages.getString("sw_terminal_msg48") 
+							   + ((int) Math.round((1-(((double) receivedReplies) / ((double) num)))*100))+"% "+messages.getString("sw_terminal_msg48") 
 							   + "\n");
 		return "";
 	}
@@ -743,10 +744,10 @@ public class Terminal extends ClientAnwendung implements I18n {
 		int fehler = 0;
 		int ttl;
 
-		for (ttl = 1; ttl <= maxHops; ttl++) {
+		for (ttl = 1; ttl <= maxHops && !interrupted; ttl++) {
 			benachrichtigeBeobachter(" " + ttl + "    ");
 
-			for (int i = 0; i < 3; i++) {
+			for (int i = 0; i < 3 && !interrupted; i++) {
 				seqNr++;
 				recv = getSystemSoftware().holeICMP().sendProbe(destIP, ttl, seqNr);
 				if (recv != null && recv.getSeqNr() == seqNr) {
@@ -772,7 +773,9 @@ public class Terminal extends ClientAnwendung implements I18n {
 		benachrichtigeBeobachter(new Boolean(false));
 		if (ttl >= maxHops) {
 			benachrichtigeBeobachter("\n\n" + args[0] + " scheint seeehr weit weg zu sein.");
-		} else if (fehler == 0) {
+		} else if (interrupted) {
+			benachrichtigeBeobachter("\n\n oh, ich wurde interrupted :(");
+		}	else if (fehler == 0) {
 			benachrichtigeBeobachter("\n\n" + args[0] + " wurde nach " + ttl + " Spruengen erreicht.");
 		} else {
 			benachrichtigeBeobachter("\n\nZu viele Fehler, ich geb' auf.");
@@ -780,6 +783,12 @@ public class Terminal extends ClientAnwendung implements I18n {
 
 		return null;
 	}
+
+
+	public void setInterrupt(boolean val) {
+		this.interrupted = val;
+	}
+
 
 	public void terminalEingabeAuswerten(String enteredCommand, String[] enteredParameters)
 	{
@@ -792,6 +801,7 @@ public class Terminal extends ClientAnwendung implements I18n {
 
 //			Main.debug.println("DEBUG:   Terminal, terminalEingabeAuswerten: \n\tMethode '"
 //					+ enteredCommand + "' gefunden.");
+			setInterrupt(false); // man will ja auch wieder was ausführen
 			ausfuehren(enteredCommand, args);
 		} catch (NoSuchMethodException e) {
 			benachrichtigeBeobachter(messages.getString("terminal_msg2")+"\n" + messages.getString("terminal_msg3") + "\n");
