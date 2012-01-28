@@ -775,7 +775,7 @@ public class Terminal extends ClientAnwendung implements I18n {
 			benachrichtigeBeobachter("\n\n" + args[0] + " scheint seeehr weit weg zu sein.");
 		} else if (interrupted) {
 			benachrichtigeBeobachter("\n\n oh, ich wurde interrupted :(");
-		}	else if (fehler == 0) {
+		} else if (fehler == 0) {
 			benachrichtigeBeobachter("\n\n" + args[0] + " wurde nach " + ttl + " Spruengen erreicht.");
 		} else {
 			benachrichtigeBeobachter("\n\nZu viele Fehler, ich geb' auf.");
