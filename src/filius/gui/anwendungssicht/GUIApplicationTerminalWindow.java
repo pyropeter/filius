@@ -48,6 +48,7 @@ import filius.Main;
 import filius.software.lokal.Terminal;
 import filius.software.system.Dateisystem;
 
+import java.util.ArrayList;
 
 /**
  * Applikationsfenster fuer ein Terminal
@@ -72,6 +73,9 @@ public class GUIApplicationTerminalWindow extends GUIApplicationWindow {
 	private String[] enteredParameters;
 	
 	private boolean multipleObserverEvents;
+
+	ArrayList<String> terminalCommandList = new ArrayList<String>(); // für pfeil-nach-oben-holt-letzten-befehl-wieder
+	int terminalCommandListStep = -1;
 
 
 	public GUIApplicationTerminalWindow(GUIDesktopPanel desktop, String appName){
@@ -105,9 +109,9 @@ public class GUIApplicationTerminalWindow extends GUIApplicationWindow {
 		inputField.setFont(new Font("Courier New",Font.PLAIN,11));
 
 		inputField.addKeyListener(new KeyListener() {
-            public void keyPressed(KeyEvent e) {
-			    if(e.getKeyCode() == KeyEvent.VK_ENTER)
-			    {
+			public void keyPressed(KeyEvent e) {
+				if(e.getKeyCode() == KeyEvent.VK_ENTER) {
+					terminalCommandListStep = -1; // lass uns doch besser wieder von unten/vorne beginnen
 					if(!(inputField.getText().isEmpty() || inputField.getText().replaceAll(" ", "").isEmpty())) {  // only process non-empty input
 						//Main.debug.println("DEBUG: "+getClass()+", keyPressed ('"+inputField.getText()+" + ENTER') event started");
 						terminalField.append("\n"+inputLabel.getText()+inputField.getText()+"\n");
@@ -146,18 +150,44 @@ public class GUIApplicationTerminalWindow extends GUIApplicationWindow {
 						{
 							inputLabel.setVisible(false);
 							jobRunning = true;
+							terminalCommandList.add(inputField.getText());
 							((Terminal) holeAnwendung()).terminalEingabeAuswerten(enteredCommand,enteredParameters);
 						}
 					}
 					else { terminalField.append("\n"); }
 					//Main.debug.println("DEBUG: "+getClass()+", keyPressed ('"+inputField.getText()+" + ENTER') event finished");
 					inputField.setText("");
-			    }
-					if (e.getKeyCode() == 67 && e.getModifiers() == 2) {
-						System.out.println("INTERRUPT");
-						((Terminal) holeAnwendung()).setInterrupt(true);
+				}
+				if (e.getKeyCode() == KeyEvent.VK_C && e.getModifiers() == 2) { // [strg] + [c]
+					System.out.println("INTERRUPT");
+					((Terminal) holeAnwendung()).setInterrupt(true);
+				}
+				if (e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_DOWN) { // 38 arrow-up / 40 arrow-down
+					if (e.getKeyCode() == KeyEvent.VK_UP) {
+						terminalCommandListStep++;
 					}
-            }
+					if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+						terminalCommandListStep--;
+					}
+					if (terminalCommandListStep < -1) {
+						terminalCommandListStep = -1;
+					}
+					if (terminalCommandListStep >= terminalCommandList.size()) {
+						terminalCommandListStep = terminalCommandList.size() - 1;
+					}
+					try {
+						if (terminalCommandListStep != -1) {
+							inputField.setText(terminalCommandList.get(terminalCommandList.size() - 1 - terminalCommandListStep));
+						}
+						else if (terminalCommandListStep == -1) {
+							inputField.setText("");
+						}
+					}
+					catch (IndexOutOfBoundsException eis) {
+					
+					}
+				}
+			}
 
 			public void keyReleased(KeyEvent arg0) {
 				
