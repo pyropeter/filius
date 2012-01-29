@@ -41,13 +41,8 @@ import filius.rahmenprogramm.Information;
  */
 public abstract class Verbindung extends Hardware implements Serializable, I18n {
 
-	/** Verzoegerung der Uebertragung in Millisekunden, wenn der
-	 * Verzoegerungsfaktor 1 ist.
-	 */
-	private static final int MIN_VERZOEGERUNG = 50;
-
-	/** Faktor der Verzoegerungszeit, der zwischen 1 und 100 */
-	private static int verzoegerungsFaktor = 1;
+	//! Verzoegerung in Millisekunden
+	private static int verzoegerung = 30;
 
 	/** maximale Anzahl von Hops zum Datenaustausch. Diese
 	 * Zahl wird verwendet, um eine Round-Trip-Time (RTT) zu
@@ -59,6 +54,9 @@ public abstract class Verbindung extends Hardware implements Serializable, I18n 
 	 * mit einem anderen Knoten gemeint.
 	 */
 	private static final int MAX_HOPS = 50;
+
+	//! Minimale RTT
+	private static final int RTTMIN = 500;
 	
 	// extend RTT in case of slow machines by this factor; 1: no change
 	private static int extendRTTfactor = 1;
@@ -116,43 +114,17 @@ public abstract class Verbindung extends Hardware implements Serializable, I18n 
 		simplexZwei.anschluesseTrennen();
 	}
 
-	public static int holeVerzoegerungsFaktor() {
-		return verzoegerungsFaktor;
-	}
-
-	/** Zum setzen den Verzoegerungsfaktors. Das Produkt daraus und der
-	 * minimalen Verzoegerung ergibt die tatsaechliche Verzoegerung
-	 * bei der Uebertragung zwischen zwei Knoten im Rechnernetz. Der
-	 * Wert des Faktors muss zwischen 1 und 100 liegen. Wenn der
-	 * uebergebene Parameter ausserhalb dieses Bereichs liegt, wird
-	 * er auf den Minimal- bzw. Maximalwert gesetzt.
-	 *
-	 * @param verzoegerungsFaktor
-	 */
-	public static void setzeVerzoegerungsFaktor(int verzoegerungsFaktor) {
-		Main.debug.println("INVOKED (static) filius.hardware.Verbindung, setzeVerzoegerungsFaktor("+verzoegerungsFaktor+")");
-		if (verzoegerungsFaktor < 1) {
-			Verbindung.verzoegerungsFaktor = 1;
-		}
-		else if (verzoegerungsFaktor > 100) {
-			Verbindung.verzoegerungsFaktor = 100;
-		}
-		else {
-		Verbindung.verzoegerungsFaktor = verzoegerungsFaktor;
-		}
-	}
-
-
 	/** Gibt die Verzoegerung einer Verbindung zwischen zwei Knoten im
-	 * Rechnernetz in Millisekunden zurueck. Dazu wird die minimale
-	 * Verzoegerungszeit von 50 Millisekunden mit dem Verzoegerungsfaktor
-	 * multipliziert.
+	 * Rechnernetz in Millisekunden zurueck.
 	 *
 	 * @return Verzoegerung der Uebertragung zwischen zwei Knoten im
 	 *   Rechnernetz in Millisekunden
 	 */
 	public static int holeVerzoegerung() {
-		return verzoegerungsFaktor * MIN_VERZOEGERUNG;
+		return verzoegerung;
+	}
+	public static void setzeVerzoegerung(int delay) {
+		verzoegerung = delay;
 	}
 
 	public static void setRTTfactor(int factor) {
@@ -165,7 +137,6 @@ public abstract class Verbindung extends Hardware implements Serializable, I18n 
 	/** maximale Round-Trip-Time (RTT) in Millisekunden <br />
 	 * solange wird auf eine Antwort auf ein Segment gewartet */
 	public static int holeRTT() {
-		//new Exception().printStackTrace(Main.debug);  // DEBUG to disclose calling functions
-		return MAX_HOPS * holeVerzoegerung() * extendRTTfactor;
+		return MAX_HOPS * holeVerzoegerung() * extendRTTfactor + RTTMIN;
 	}
 }

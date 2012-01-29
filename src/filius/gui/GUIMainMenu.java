@@ -88,6 +88,11 @@ public class GUIMainMenu implements Serializable, I18n {
 	
 	private LinkedList<DHCPServer> listDHCPServers = new LinkedList<DHCPServer>();
 
+	private static final int SLIDER = 6;
+	private int sliderToDelay(int val) {
+		return (int)Math.pow(val, 2);
+	}
+
 	public GUIMainMenu() {
 		Main.debug.println("INVOKED ("+this.hashCode()+") "+getClass()+" (GUIMainMenu), constr: GUIMainMenu()");
 		Container c = JMainFrame.getJMainFrame().getContentPane();
@@ -344,28 +349,22 @@ public class GUIMainMenu implements Serializable, I18n {
 		btInfo.addActionListener(al);
 		btHilfe.addActionListener(al);
 
-		geschwindigkeit = new JLabel("100%");
+		geschwindigkeit = new JLabel("" + sliderToDelay(SLIDER) + " ms");
 		geschwindigkeit.setVisible(true);
 		geschwindigkeit.setAlignmentX(JLabel.RIGHT_ALIGNMENT);
 		geschwindigkeit.setBounds(552, 10, 120, 44);
 
-		verzoegerung = new JSlider(0, 100);
-		verzoegerung.setMaximum(10);
-		verzoegerung.setMinimum(1);
-		verzoegerung.setValue(verzoegerung.getMaximum());
-		Verbindung.setzeVerzoegerungsFaktor(verzoegerung.getMaximum()
-				- verzoegerung.getValue() + 1);
+		verzoegerung = new JSlider(2, 20);
+		verzoegerung.setValue(SLIDER);
+		Verbindung.setzeVerzoegerung(sliderToDelay(verzoegerung.getValue()));
 		verzoegerung.setBounds(450, 10, 100, 44);
 		verzoegerung.setOpaque(false);
 		verzoegerung.addChangeListener(new ChangeListener() {
-
 			public void stateChanged(ChangeEvent arg0) {
-				Verbindung.setzeVerzoegerungsFaktor(verzoegerung.getMaximum()
-						- verzoegerung.getValue() + 1);
-				geschwindigkeit
-						.setText("" + verzoegerung.getValue() * 10 + "%");
+				int delay = sliderToDelay(verzoegerung.getValue());
+				Verbindung.setzeVerzoegerung(delay);
+				geschwindigkeit.setText("" + delay + " ms");
 			}
-
 		});
 
 		menupanel.setLayout(null);
@@ -414,13 +413,7 @@ public class GUIMainMenu implements Serializable, I18n {
 	}
 	
 	public void changeSlider(int diff) {
-		if (diff < 0 && verzoegerung.getValue()+diff < 1) {
-			verzoegerung.setValue(1);
-		}
-		else if (diff > 0 && verzoegerung.getValue()+diff > 10) {
-			verzoegerung.setValue(10);
-		}
-		else verzoegerung.setValue(verzoegerung.getValue() + diff);				
+		verzoegerung.setValue(verzoegerung.getValue() + diff);
 	}
 	
 	public boolean doClick(String button) {   // manually perform click event on a registered button
