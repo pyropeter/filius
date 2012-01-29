@@ -78,7 +78,7 @@ public class GUIApplicationTerminalWindow extends GUIApplicationWindow {
 	int terminalCommandListStep = -1;
 
 
-	public GUIApplicationTerminalWindow(GUIDesktopPanel desktop, String appName){
+	public GUIApplicationTerminalWindow(GUIDesktopPanel desktop, String appName) {
 		super(desktop, appName);
 		this.setMaximizable(false);
 		this.setResizable(false);
@@ -224,10 +224,6 @@ public class GUIApplicationTerminalWindow extends GUIApplicationWindow {
 		this.getContentPane().add(backPanel);
 
 		terminalField.setText( "" );
-		for (int i=0; i<12; i++) { terminalField.append(" \n"); } // padding with new lines for bottom alignment of new output
-		terminalField.append(  "================================================================\n"  );
-		terminalField.append(messages.getString("sw_terminal_msg25"));
-		terminalField.append(  "================================================================\n\n"  );
 
 		try {
 			Thread.sleep(100);
