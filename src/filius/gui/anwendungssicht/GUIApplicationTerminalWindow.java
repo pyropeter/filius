@@ -197,7 +197,7 @@ public class GUIApplicationTerminalWindow extends GUIApplicationWindow {
 
 			}
 
-         });
+		});
 
 
 		inputLabel = new JLabel(">");
@@ -224,11 +224,11 @@ public class GUIApplicationTerminalWindow extends GUIApplicationWindow {
 		this.getContentPane().add(backPanel);
 
 		terminalField.setText( "" );
-		for (int i=0; i<15; i++) { terminalField.append(" \n"); } // padding with new lines for bottom alignment of new output
+		for (int i=0; i<12; i++) { terminalField.append(" \n"); } // padding with new lines for bottom alignment of new output
 		terminalField.append(  "================================================================\n"  );
-		terminalField.append(messages.getString("sw_terminal_msg25")
-				     + "================================================================"
-				     + "\n");
+		terminalField.append(messages.getString("sw_terminal_msg25"));
+		terminalField.append(  "================================================================\n\n"  );
+
 		try {
 			Thread.sleep(100);
 		} catch (InterruptedException e) {}
@@ -302,23 +302,21 @@ public class GUIApplicationTerminalWindow extends GUIApplicationWindow {
 		Main.debug.println("INVOKED ("+this.hashCode()+") "+getClass()+" (GUIApplicationTerminalWindow), update("+arg0+","+arg1+")");
 		if (arg1 == null) return;
 		if (jobRunning) {
-			//Main.debug.println("DEBUG:  terminalField.height="+terminalField.getHeight()+", tpPane.height="+tpPane.getHeight());
 			if (arg1 instanceof Boolean) { 
 				multipleObserverEvents=((Boolean) arg1).booleanValue(); 
 			}
 			else {   // expect String
 				this.terminalField.append(arg1.toString());
-				//this.terminalField.updateUI();
 				try {
 					// mini delay to let the terminalField reliably update its new height
 					Thread.sleep(200);
 				} catch (InterruptedException e) {}
 				this.tpPane.repaint();
 				this.tpPane.getVerticalScrollBar().setValue(this.tpPane.getVerticalScrollBar().getMaximum());
-				if(!multipleObserverEvents) {  // is this observer call expected to be the last one for the current command, i.e., multipleOverserverEvents=false?
+				if (!multipleObserverEvents) {  // is this observer call expected to be the last one for the current command, i.e., multipleOverserverEvents=false?
 					this.inputLabel.setText("root "+Dateisystem.absoluterPfad(((Terminal)holeAnwendung()).getAktuellerOrdner())+"> ");
-			    	this.inputLabel.setVisible(true);
-			    	jobRunning=false;
+					this.inputLabel.setVisible(true);
+					jobRunning=false;
 				}
 			}
 		}
