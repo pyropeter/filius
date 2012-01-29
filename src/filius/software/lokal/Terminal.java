@@ -784,11 +784,14 @@ public class Terminal extends ClientAnwendung implements I18n {
 		return null;
 	}
 
-
 	public void setInterrupt(boolean val) {
 		this.interrupted = val;
 	}
 
+	public void beenden() {
+		setInterrupt(true);
+		super.beenden();
+	}
 
 	public void terminalEingabeAuswerten(String enteredCommand, String[] enteredParameters)
 	{
