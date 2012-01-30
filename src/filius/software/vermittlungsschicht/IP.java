@@ -82,7 +82,11 @@ public class IP extends VermittlungsProtokoll implements I18n {
 
 		try {
 			for (int i = 0; i < 4; i++) {
-				octet = Integer.parseInt(ipToken.nextToken());
+				try {
+					octet = Integer.parseInt(ipToken.nextToken());
+				} catch (java.lang.NumberFormatException e) {
+					return -1;
+				}
 				if (0 > octet || octet > 255) {
 					return -1;
 				}
