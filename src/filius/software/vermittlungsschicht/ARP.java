@@ -38,6 +38,7 @@ import filius.hardware.knoten.InternetKnoten;
 import filius.software.netzzugangsschicht.EthernetFrame;
 import filius.software.system.InternetKnotenBetriebssystem;
 import filius.software.system.SystemSoftware;
+import filius.software.vermittlungsschicht.IP;
 
 /**
  * In dieser Klasse ist das Address Resolution Protocol (ARP) implementiert.
@@ -177,35 +178,48 @@ public class ARP extends VermittlungsProtokoll {
 
 	/** Hilfsmethode zum Versenden einer ARP-Anfrage */
 	private void sendeARPBroadcast(String suchIp) {
-		Main.debug.println("INVOKED ("+this.hashCode()+") "+getClass()+" (ARP), sendeARPBroadcast("+suchIp+")");
-		ListIterator it;
-		ArpPaket arpPaket;
-		String ipAdresse, netzmaske, mac;
-		NetzwerkInterface nic;
+		NetzwerkInterface nic = getBroadcastNic(suchIp);
+		if (nic == null) {
+			return;
+		}
 
-		arpPaket = new ArpPaket();
+		ArpPaket arpPaket = new ArpPaket();
 		arpPaket.setProtokollTyp(EthernetFrame.ARP);
 		arpPaket.setZielIp(suchIp);
 		arpPaket.setZielMacAdresse("FF:FF:FF:FF:FF:FF");
+		arpPaket.setQuellIp(nic.getIp());
+		arpPaket.setQuellMacAdresse(nic.getMac());
 
-		it = ((InternetKnoten) holeSystemSoftware().getKnoten())
-				.getNetzwerkInterfaces().listIterator();
+		((InternetKnotenBetriebssystem) holeSystemSoftware())
+				.holeEthernet().senden(arpPaket, nic.getMac(),
+						"FF:FF:FF:FF:FF:FF",
+						EthernetFrame.ARP);
+	}
 
+	public NetzwerkInterface getBroadcastNic(String zielStr) {
+		long netAddr, maskAddr, zielAddr = IP.inetAton(zielStr);
+		NetzwerkInterface nic;
+
+		long bestMask = -1;
+		NetzwerkInterface bestNic = null;
+
+		SystemSoftware firmware = holeSystemSoftware();
+		InternetKnoten knoten = (InternetKnoten) firmware.getKnoten();
+		ListIterator it = knoten.getNetzwerkInterfaces().listIterator();
 		while (it.hasNext()) {
 			nic = (NetzwerkInterface) it.next();
-			ipAdresse = nic.getIp();
-			netzmaske = nic.getSubnetzMaske();
-			mac = nic.getMac();
 
-			if (gleichesRechnernetz(suchIp, ipAdresse, netzmaske)) {
-				arpPaket.setQuellIp(ipAdresse);
-				arpPaket.setQuellMacAdresse(mac);
-
-				((InternetKnotenBetriebssystem) holeSystemSoftware())
-						.holeEthernet().senden(arpPaket, mac,
-								"FF:FF:FF:FF:FF:FF", EthernetFrame.ARP);
+			maskAddr = IP.inetAton(nic.getSubnetzMaske());
+			if (maskAddr <= bestMask) {
+				continue;
+			}
+			netAddr = IP.inetAton(nic.getIp()) & maskAddr;
+			if (netAddr == (maskAddr & zielAddr)) {
+				bestMask = maskAddr;
+				bestNic = nic;
 			}
 		}
+		return bestNic;
 	}
 	
 	public ARPThread getARPThread() {

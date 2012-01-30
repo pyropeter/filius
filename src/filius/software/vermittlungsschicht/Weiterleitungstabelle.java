@@ -34,6 +34,7 @@ import filius.hardware.NetzwerkInterface;
 import filius.hardware.knoten.InternetKnoten;
 import filius.rahmenprogramm.I18n;
 import filius.software.system.InternetKnotenBetriebssystem;
+import filius.software.vermittlungsschicht.IP;
 
 /**
  * Mit dieser Klasse wird die Weiterleitungstabelle implementiert. Es werden
@@ -273,29 +274,11 @@ public class Weiterleitungstabelle implements I18n {
 	 * Netzwerkkennung als String zu erzeugen. Bsp.: 192.168.2.6 und
 	 * 255.255.255.0 wird zu 192.168.2.0
 	 */
-	private String berechneNetzkennung(String ipAdresse, String netzmaske) {
-		Main.debug.println("INVOKED ("+this.hashCode()+") "+getClass()+" (Weiterleitungstabelle), berechneNetzkennung("+ipAdresse+","+netzmaske+")");
-		int[] adresse, maske, netzkennung;
-		StringTokenizer tokenizer;
-
-		tokenizer = new StringTokenizer(ipAdresse, ".");
-		adresse = new int[4];
-		for (int i = 0; i < adresse.length && tokenizer.hasMoreTokens(); i++) {
-			adresse[i] = Integer.parseInt(tokenizer.nextToken());
-		}
-		tokenizer = new StringTokenizer(netzmaske, ".");
-		maske = new int[4];
-		for (int i = 0; i < maske.length && tokenizer.hasMoreTokens(); i++) {
-			maske[i] = Integer.parseInt(tokenizer.nextToken());
-		}
-
-		netzkennung = new int[4];
-		for (int i = 0; i < 4; i++) {
-			netzkennung[i] = adresse[i] & maske[i];
-		}
-
-		return netzkennung[0] + "." + netzkennung[1] + "." + netzkennung[2]
-				+ "." + netzkennung[3];
+	private String berechneNetzkennung(String ipStr, String maskStr) {
+		long ipAddr = IP.inetAton(ipStr);
+		long maskAddr = IP.inetAton(maskStr);
+		long netAddr = ipAddr & maskAddr;
+		return IP.inetNtoa(netAddr);
 	}
 
 	/**
@@ -308,26 +291,26 @@ public class Weiterleitungstabelle implements I18n {
 	 *         naechsten Gateways und der fuer den Versand zu verwendenden
 	 *         Schnittstelle
 	 */
-	public String[] holeWeiterleitungsZiele(String zielIP) {
-		Main.debug.println("INVOKED ("+this.hashCode()+") "+getClass()+" (Weiterleitungstabelle), holeWeiterleitungsZiele("+zielIP+")");
-		String[] routeString = null;
-		ListIterator it = holeTabelle().listIterator();
+	public String[] holeWeiterleitungsZiele(String zielStr) {
+		long netAddr, maskAddr, zielAddr = IP.inetAton(zielStr);
+		String[] route;
+
+		long bestMask = -1;
+		String[] bestRoute = null;
 		
-		while (it.hasNext() && routeString == null) {
-			String[] tmpString = (String[]) it.next();
-			if (!tmpString[1].equals("0.0.0.0")) {
-				if (VermittlungsProtokoll.gleichesRechnernetz(zielIP,
-						tmpString[0], tmpString[1])) {
-					routeString = new String[]{ tmpString[2], tmpString[3] };
-				}
-			} else {
-				// no explicit match found --> standard gateway will be used
-				String[] tempy = { tmpString[2], tmpString[3] };
-				Main.debug.println("DEBUG ("+this.hashCode()+") "+getClass()+" (Weiterleitungstabelle), holeWeiterleitungsZiele:   using standard gateway: "+tempy);
-				routeString = tempy;
+		ListIterator it = holeTabelle().listIterator();
+		while (it.hasNext()) {
+			route = (String[]) it.next();
+			maskAddr = IP.inetAton(route[1]);
+			if (maskAddr <= bestMask) {
+				continue;
+			}
+			netAddr = IP.inetAton(route[0]);
+			if (netAddr == (maskAddr & zielAddr)) {
+				bestMask = maskAddr;
+				bestRoute = new String[]{route[2], route[3]};
 			}
 		}
-		if(routeString==null) { Main.debug.println("ERROR ("+this.hashCode()+"), holeWeiterleitungsZiele:  routeString is still 'null' at return point!   (is there a standard gateway for this device?)"); }
-		return routeString;
+		return bestRoute;
 	}
 }

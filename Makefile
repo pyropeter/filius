@@ -11,11 +11,13 @@ OBJS = $(SRCS:.java=.class)
 LIBS = lib/jna.jar lib/htmlparser.jar
 CLASSPATH = $(subst $(space),:,$(LIBS))
 
+RUNARGS = -v
+
 .PHONY: build run clean
 .PRECIOUS: $(LIBS) lib/htmlparser.zip
 
 test:	build
-	java -cp $(CLASSPATH):src filius.Main -v
+	java -cp $(CLASSPATH):src filius.Main $(RUNARGS)
 
 build:	Makefile.depends $(LIBS) $(OBJS)
 

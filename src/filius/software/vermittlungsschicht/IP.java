@@ -28,6 +28,7 @@ package filius.software.vermittlungsschicht;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.StringTokenizer;
+import java.util.NoSuchElementException;
 
 import filius.Main;
 import filius.exception.VerbindungsException;
@@ -74,34 +75,53 @@ public class IP extends VermittlungsProtokoll implements I18n {
 		Main.debug.println("INVOKED-2 ("+this.hashCode()+") "+getClass()+" (IP), constr: IP("+systemsoftware+")");
 	}
 
-	public static String ipCheck(String ip) {
-		Main.debug.println("INVOKED (static) filius.software.vermittlungsschicht.IP, ipCheck("+ip+")");
-		String neueIp = "";
-		int a;
-		StringTokenizer st;
+	public static long inetAton(String ipStr) {
+		long ipAddr = 0;
+		int octet;
+		StringTokenizer ipToken = new StringTokenizer(ipStr, ".");
 
-		st = new StringTokenizer(ip, ".");
 		try {
 			for (int i = 0; i < 4; i++) {
-				a = Integer.parseInt(st.nextToken());
-				if ((a < 0) || (a > 255)) {
-					return null;
+				octet = Integer.parseInt(ipToken.nextToken());
+				if (0 > octet || octet > 255) {
+					return -1;
 				}
-				else {
-					neueIp += "" + a;
-					if (i < 3) {
-						neueIp += ".";
-					}
+				ipAddr += octet;
+				if (i < 3) {
+					ipAddr <<= 8;
 				}
 			}
-			return neueIp;
+		} catch (NoSuchElementException e) {
+			return -1;
 		}
-		catch (Exception e) {
-		  	Main.debug.println("INFO: ipCheck: keine gültige IP-Adresse: '"+ip+"'");
+
+		if (ipToken.hasMoreTokens()) {
+			return -1;
+		}
+
+		return ipAddr;
+	}
+
+	public static String inetNtoa(long ipAddr) {
+		String ipStr = "";
+		ipStr = "." + (ipAddr & 255);
+		ipAddr >>= 8;
+		ipStr = "." + (ipAddr & 255) + ipStr;
+		ipAddr >>= 8;
+		ipStr = "." + (ipAddr & 255) + ipStr;
+		ipAddr >>= 8;
+		ipStr =       (ipAddr & 255) + ipStr;
+		return ipStr;
+	}
+
+	public static String ipCheck(String ip) {
+		long ipAddr = inetAton(ip);
+		if (ipAddr == -1) {
 			return null;
 		}
+		return inetNtoa(ipAddr);
 	}
-	
+
 	/** Hilfsmethode zum Versenden eines Broadcast-Pakets */
 	private void sendeBroadcast(IpPaket ipPaket) {
 		Main.debug.println("INVOKED ("+this.hashCode()+") "+getClass()+" (IP), sendeBroadcast("+ipPaket.toString()+")");
