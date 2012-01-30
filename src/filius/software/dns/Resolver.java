@@ -94,45 +94,66 @@ public class Resolver extends ClientAnwendung {
 	 * Methode zum Versenden einer Anfrage und zur Rueckgabe der
 	 * DNS-Server-Antwort als DNSNachricht
 	 */
-	private DNSNachricht holeResourceRecord(String typ, String domainname, String dnsServer) throws java.util.concurrent.TimeoutException {
-		Main.debug.println("INVOKED ("+this.hashCode()+", T"+this.getId()+") "+getClass()+" (Resolver), holeResourceRecord("+typ+","+domainname+")");
-		DNSNachricht anfrage, antwort = null;
-		String tmp;
-		UDPSocket socket = null;
+	private DNSNachricht holeResourceRecord(String typ, String domainname, String dnsServer) {
+		if (dnsServer == null || dnsServer.trim().equals("")) {
+			return null;
+		}
 
-		if (dnsServer != null && !dnsServer.equals("")) {
-			if (socket == null) {
-				try {
-					socket = new UDPSocket(getSystemSoftware(), dnsServer, 53);
+		DNSNachricht anfrage = new DNSNachricht(DNSNachricht.QUERY);
+		anfrage.hinzuQuery(domainname + " " + typ + " IN");
 
-					anfrage = new DNSNachricht(DNSNachricht.QUERY);
-					anfrage.hinzuQuery(domainname + " " + typ + " IN");
+		String antwortStr;
+		try {
+			UDPSocket socket = new UDPSocket(getSystemSoftware(), dnsServer, 53);
+			socket.verbinden();
+			socket.senden(anfrage.toString());
+			antwortStr = socket.empfangen(Verbindung.holeRTT());
+			socket.schliessen();
+		} catch (VerbindungsException e) {
+			return null;
+		}
 
-					socket.verbinden();
-					socket.senden(anfrage.toString());
-					tmp = socket.empfangen(Verbindung.holeRTT());
-					if (tmp == null) {
-						Main.debug.println("ERROR (" + this.hashCode() + "): keine Antwort auf Query empfangen");
-						throw new TimeoutException(); // inform calling function
-													  // about Timeout
-					}
+		if (antwortStr == null) {
+			return null;
+		}
+		DNSNachricht antwort = new DNSNachricht(antwortStr);
 
-					antwort = new DNSNachricht(tmp);
-					if (antwort.getId() != anfrage.getId()) {
-						return null;
-					}
-					socket.schliessen();
-					socket = null;
-				} catch (VerbindungsException e) {
-					e.printStackTrace(Main.debug);
-					return null;
-				}
-			}
-		} else {
+		if (antwort.getId() != anfrage.getId()) {
 			return null;
 		}
 
 		return antwort;
+	}
+
+	public String holeIterativ(String typ, String domain) {
+		String server = getSystemSoftware().getDNSServer();
+		if (server == null || server.trim().equals("")) {
+			return null;
+		}
+
+		DNSNachricht antwort;
+		String res;
+		for (int i = 0; i < 10; i++) {
+			antwort = holeResourceRecord(typ, domain, server);
+			if (antwort == null) {
+				return null;
+			}
+
+			LinkedList<ResourceRecord> records = new LinkedList<ResourceRecord>();
+			records.addAll(antwort.holeAntwortResourceRecords());
+			records.addAll(antwort.holeAuthoritativeResourceRecords());
+			records.addAll(antwort.holeZusatzResourceRecords());
+
+			res = durchsucheRecordListe(typ, domain, records);
+			if (res != null) {
+				return res;
+			}
+			res = durchsucheRecordListe(ResourceRecord.ADDRESS, records);
+			if (res == null || res == server) {
+				return null;
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -141,106 +162,28 @@ public class Resolver extends ClientAnwendung {
 	 * @param domainname
 	 * @return
 	 */
-	public String holeIPAdresse(String domainname) throws TimeoutException {
-		Main.debug.println("INVOKED ("+this.hashCode()+", T"+this.getId()+") "+getClass()+" (Resolver), holeIPAdresse("+domainname+")");
-		DNSNachricht antwort;
-		String adresse, dnsServerDomain;
-		String dnsServer = getSystemSoftware().getDNSServer();
-
-		if (domainname.equalsIgnoreCase("localhost")) {
+	public String holeIPAdresse(String domain) {
+		if (domain.equalsIgnoreCase("localhost")) {
 			return "127.0.0.1";
 		}
-		
-		adresse = IP.ipCheck(domainname); 
-		if (adresse != null) {		// is domainname already a valid IPv4 address? 
-			                        // then return its content without leading zeros
+
+		String adresse = IP.ipCheck(domain);
+		if (adresse != null) {
 			return adresse;
 		}
 
-		while (dnsServer != null) {
-			antwort = holeResourceRecord(ResourceRecord.ADDRESS, domainname,
-					dnsServer);
-			if (antwort == null) {
-				return null;
-			}
-
-			adresse = durchsucheRecordListe(ResourceRecord.ADDRESS, domainname,
-					antwort.holeAntwortResourceRecords());
-			if (adresse != null)
-				return adresse;
-
-			adresse = durchsucheRecordListe(ResourceRecord.ADDRESS, domainname,
-					antwort.holeAuthoritativeResourceRecords());
-			if (adresse != null)
-				return adresse;
-
-			adresse = durchsucheRecordListe(ResourceRecord.ADDRESS, domainname,
-					antwort.holeZusatzResourceRecords());
-			if (adresse != null)
-				return adresse;
-
-			dnsServerDomain = durchsucheRecordListe(ResourceRecord.NAME_SERVER,
-					antwort.holeAntwortResourceRecords());
-			dnsServer = durchsucheRecordListe(ResourceRecord.ADDRESS,
-					dnsServerDomain, antwort.holeAntwortResourceRecords());
-		}
-
-		return null;
+		return holeIterativ(ResourceRecord.ADDRESS, domain);
 	}
 
-	public String holeIPAdresseMailServer(String domainname) throws TimeoutException {
-		Main.debug.println("INVOKED ("+this.hashCode()+", T"+this.getId()+") "+getClass()+" (Resolver), holeIPAdressMailServer("+domainname+")");
-		DNSNachricht antwort=null;
-		String mailserver=null, adresse, dnsServerDomain;
-		String dnsServer = getSystemSoftware().getDNSServer();
-
-		while (dnsServer != null && mailserver == null) {
-			antwort = holeResourceRecord(ResourceRecord.MAIL_EXCHANGE,
-					domainname, dnsServer);
-			if (antwort == null) {
-				return null;
-			}
-
-			mailserver = durchsucheRecordListe(ResourceRecord.MAIL_EXCHANGE,
-					domainname, antwort.holeAntwortResourceRecords());
-			if (mailserver == null) {
-				mailserver = durchsucheRecordListe(
-						ResourceRecord.MAIL_EXCHANGE, domainname,
-						antwort.holeAntwortResourceRecords());
-			}
-			if (mailserver == null) {
-				mailserver = durchsucheRecordListe(
-						ResourceRecord.MAIL_EXCHANGE, domainname,
-						antwort.holeAntwortResourceRecords());
-			}
-			if (mailserver == null) {
-				dnsServerDomain = durchsucheRecordListe(
-						ResourceRecord.NAME_SERVER,
-						antwort.holeAntwortResourceRecords());
-				dnsServer = durchsucheRecordListe(ResourceRecord.ADDRESS,
-						dnsServerDomain, antwort.holeAntwortResourceRecords());
-			}
-		}
-		if (mailserver == null)
+	public String holeIPAdresseMailServer(String domain) {
+		String mxdomain = holeIterativ(ResourceRecord.MAIL_EXCHANGE, domain);
+		if (mxdomain == null) {
 			return null;
-
-		adresse = durchsucheRecordListe(ResourceRecord.ADDRESS, mailserver,
-				antwort.holeAntwortResourceRecords());
-		if (adresse != null) return adresse;
-
-		adresse = durchsucheRecordListe(ResourceRecord.ADDRESS, mailserver,
-				antwort.holeAuthoritativeResourceRecords());
-		if (adresse != null) return adresse;
-
-		adresse = durchsucheRecordListe(ResourceRecord.ADDRESS, mailserver,
-				antwort.holeZusatzResourceRecords());
-		if (adresse != null) return adresse;
-
-		else {
-			return holeIPAdresse(mailserver);
 		}
+
+		return holeIterativ(ResourceRecord.ADDRESS, mxdomain);
 	}
-	
+
 	private String durchsucheRecordListe(String typ, LinkedList<ResourceRecord> liste) {
 		for (ResourceRecord rr : liste) {
 			if (rr.getType().equals(typ)) {
