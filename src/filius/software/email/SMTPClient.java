@@ -222,17 +222,9 @@ public class SMTPClient extends ClientAnwendung implements I18n {
 	 */
 	public String loeseURLauf(String url) {
 		Main.debug.println("INVOKED ("+this.hashCode()+", T"+this.getId()+") "+getClass()+" (SMTPClient), loeseURLauf("+url+")");
-		String ipAdresse = "";
 		String[] teileDerEmail = url.split("@");
 
-		try {
-			ipAdresse = getSystemSoftware().holeDNSClient().holeIPAdresseMailServer(teileDerEmail[1]);
-		}
-		catch (java.util.concurrent.TimeoutException e) {
-			e.printStackTrace(Main.debug);
-		}
-
-		return ipAdresse;
+		return  getSystemSoftware().holeDNSClient().holeIPAdresseMailServer(teileDerEmail[1]);
 	}
 
 	/**

@@ -154,8 +154,7 @@ public class DHCPServer extends UDPServerAnwendung {
 
 		if (freieIP != null) {
 			reserviereIPAdresse(maddr, freieIP, System.currentTimeMillis()
-					+ Verbindung.holeVerzoegerungsFaktor()
-					* (long) (Verbindung.holeRTT() * 1.5));
+					+ (long) (Verbindung.holeRTT() * 20));
 			letztevergebeneIPm = freieIP;
 		}
 
