@@ -152,6 +152,7 @@ public class Resolver extends ClientAnwendung {
 			if (res == null || res == server) {
 				return null;
 			}
+			server = res;
 		}
 		return null;
 	}
