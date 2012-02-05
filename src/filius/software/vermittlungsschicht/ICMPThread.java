@@ -94,9 +94,14 @@ public class ICMPThread extends ProtokollThread {
 
 		if (vermittlung.isLocal(icmpPaket.getZielIp())) {
 			// Paket wurde an diesen Rechner gesendet
-			synchronized(rcvdPackets) {
-				rcvdPackets.add(icmpPaket);
-				rcvdPackets.notify();
+			if (icmpPaket.getIcmpType() == 8
+					&& icmpPaket.getIcmpCode() == 0) {
+				vermittlung.sendEchoReply(icmpPaket);
+			} else {
+				synchronized(rcvdPackets) {
+					rcvdPackets.add(icmpPaket);
+					rcvdPackets.notify();
+				}
 			}
 		} else {
 			// Paket wurde an anderen Rechner gesendet und
@@ -151,6 +156,4 @@ public class ICMPThread extends ProtokollThread {
 		}
 		return null;
 	}
-	
-
 }
