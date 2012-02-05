@@ -52,6 +52,8 @@ public class ModemAnschlussBeobachterExtern extends ProtokollThread {
 	 */
 	private InputStream in;
 
+	private boolean neuverbinden;
+
 	/**
 	 * Konstruktor zur Initialisierung der Firmware und des Sockets. Der
 	 * Konstruktor der Oberklasse wird <b>nicht</b> aufgerufen.
@@ -88,7 +90,15 @@ public class ModemAnschlussBeobachterExtern extends ProtokollThread {
 			catch (Exception e) {
 				e.printStackTrace(Main.debug);
 				running = false;
-				firmware.trennen();
+				if (neuverbinden) {
+					firmware.trennen();
+					if (firmware.getMode()
+							== firmware.SERVER) {
+						firmware.starteServer();
+					}
+				} else {
+					firmware.trennen();
+				}
 			}
 		}
 	}
@@ -110,4 +120,13 @@ public class ModemAnschlussBeobachterExtern extends ProtokollThread {
 			}
 		}
 	}
+
+ 	public void starten() {
+ 		neuverbinden = true;
+ 		super.starten();
+ 	}
+ 	public void beenden() {
+ 		neuverbinden = false;
+ 		super.beenden();
+ 	}
 }
