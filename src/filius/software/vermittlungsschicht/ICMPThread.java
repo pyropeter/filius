@@ -87,35 +87,24 @@ public class ICMPThread extends ProtokollThread {
 	 * Methode zur Verarbeitung eingehender ICMP-Pakete <br />
 	 */
 	protected void verarbeiteDatenEinheit(Object datenEinheit) {
-		Main.debug.println("INVOKED ("+this.hashCode()+", T"+this.getId()+") "+getClass()+" (ICMPThread), verarbeiteDateneinheit("+datenEinheit.toString()+")");
-		// String zielIPAdresse;
 		IcmpPaket icmpPaket = (IcmpPaket) datenEinheit;
 
+		// TTL dekrementieren
 		icmpPaket.setTtl(icmpPaket.getTtl()-1);
-		if ((
-				icmpPaket.getZielIp().equals(IP.LOCALHOST) || 
-				icmpPaket.getZielIp().equals(((InternetKnotenBetriebssystem)
-					vermittlung.holeSystemSoftware()).holeIPAdresse()))
-			&& (
-				icmpPaket.getIcmpType() == 0 ||
-				icmpPaket.getIcmpType() == 11)) {
-			// Paket wurde an diesen Rechner gesendet, und ist ein
-			// ICMP Echo Reply oder ein ICMP Time Exceeded
+
+		if (vermittlung.isLocal(icmpPaket.getZielIp())) {
+			// Paket wurde an diesen Rechner gesendet
 			synchronized(rcvdPackets) {
 				rcvdPackets.add(icmpPaket);
 				rcvdPackets.notify();
 			}
-			return;
-		}
-		// not a reply packet or at least not for this host:
-		try {
+		} else {
+			// Paket wurde an anderen Rechner gesendet und
+			// muss weitergeleitet werden
 			vermittlung.weiterleitenPaket(icmpPaket);
 		}
-		catch (VerbindungsException e) {
-			e.printStackTrace(Main.debug);
-		}
 	}
-	
+
 	// method to actually send a ping and compute the pong event
 	// return true if successful
 	public int startSinglePing(String destIp, int seqNr) throws java.util.concurrent.TimeoutException {

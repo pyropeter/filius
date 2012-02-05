@@ -26,10 +26,13 @@
 package filius.software.vermittlungsschicht;
 
 import java.util.StringTokenizer;
+import java.util.ListIterator;
 
 import filius.Main;
 import filius.software.Protokoll;
 import filius.software.system.SystemSoftware;
+import filius.hardware.knoten.InternetKnoten;
+import filius.hardware.NetzwerkInterface;
 
 /** Oberklasse von ARP und IP mit Hilfsmethoden */
 public abstract class VermittlungsProtokoll extends Protokoll {
@@ -89,5 +92,22 @@ public abstract class VermittlungsProtokoll extends Protokoll {
 		}
 
 		return gleichesRechnernetz;
+	}
+
+	public boolean isLocal(String ip) {
+		if (gleichesRechnernetz(ip, "127.0.0.0", "255.0.0.0")) {
+			return true;
+		}
+
+		InternetKnoten knoten = (InternetKnoten) holeSystemSoftware().getKnoten();
+		ListIterator it = knoten.getNetzwerkInterfaces().listIterator();
+		NetzwerkInterface nic;
+		while (it.hasNext()) {
+			nic = (NetzwerkInterface) it.next();
+			if (ip.equals(nic.getIp())) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

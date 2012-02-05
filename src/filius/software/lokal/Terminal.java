@@ -590,10 +590,6 @@ public class Terminal extends ClientAnwendung implements I18n {
 				return messages.getString("sw_terminal_msg30");
 			}
 		}
-		catch (java.util.concurrent.TimeoutException e) {
-			benachrichtigeBeobachter(messages.getString("sw_terminal_msg31"));
-			return messages.getString("sw_terminal_msg31");
-		}
 		catch (Exception e) {
 			e.printStackTrace(filius.Main.debug);
 			benachrichtigeBeobachter(messages.getString("sw_terminal_msg29"));
@@ -633,10 +629,6 @@ public class Terminal extends ClientAnwendung implements I18n {
 				benachrichtigeBeobachter(messages.getString("sw_terminal_msg30"));
 				return messages.getString("sw_terminal_msg30");
 			}
-		}
-		catch (java.util.concurrent.TimeoutException e) {
-			benachrichtigeBeobachter(messages.getString("sw_terminal_msg31")+" (DNS)");
-			return messages.getString("sw_terminal_msg31"+" (DNS)");
 		}
 		catch (Exception e) {
 			e.printStackTrace(filius.Main.debug);
@@ -717,10 +709,6 @@ public class Terminal extends ClientAnwendung implements I18n {
 				}
 
 				destIP = res.holeIPAdresse(args[0]);
-
-			} catch (java.util.concurrent.TimeoutException e) {
-				benachrichtigeBeobachter("Fehler: Zeitueberschreitung bei der DNS-Aufloesung.");
-				return null;
 			} catch (Exception e) {
 				e.printStackTrace(filius.Main.debug);
 				benachrichtigeBeobachter("Fehler: Irgendwas ist ganz doll kaputt.");
@@ -760,7 +748,7 @@ public class Terminal extends ClientAnwendung implements I18n {
 
 			if (fehler == 0) {
 				benachrichtigeBeobachter(recv.getQuellIp());
-				if (recv.getIcmpType() == 0) {
+				if (recv.getIcmpType() != 11) {
 					break;
 				}
 			} else if (fehler > 5) {
@@ -774,7 +762,22 @@ public class Terminal extends ClientAnwendung implements I18n {
 		if (ttl >= maxHops) {
 			benachrichtigeBeobachter("\n\n" + args[0] + " scheint seeehr weit weg zu sein.");
 		} else if (interrupted) {
-			benachrichtigeBeobachter("\n\n oh, ich wurde interrupted :(");
+			benachrichtigeBeobachter("\n\noh, ich wurde interrupted :(");
+		} else if (recv.getIcmpType() == 3) {
+			switch (recv.getIcmpCode()) {
+				case 0:
+					benachrichtigeBeobachter("\n\nFehler: ICMP Network Unreachable von "
+							+ recv.getQuellIp());
+					break;
+				case 1:
+					benachrichtigeBeobachter("\n\nFehler: ICMP Host Unreachable von "
+							+ recv.getQuellIp());
+					break;
+				default:
+					benachrichtigeBeobachter("\n\nFehler: ICMP Destination Unreachable (code "
+							+ recv.getIcmpCode() + ") von " + recv.getQuellIp());
+					break;
+			}
 		} else if (fehler == 0) {
 			benachrichtigeBeobachter("\n\n" + args[0] + " wurde nach " + ttl + " Spruengen erreicht.");
 		} else {

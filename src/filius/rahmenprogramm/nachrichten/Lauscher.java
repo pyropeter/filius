@@ -366,6 +366,20 @@ public class Lauscher implements I18n {
 						case 0:
 							neuerEintrag[6] = "ICMP Echo Reply (pong)";
 							break;
+						case 3:
+							switch (icmpPaket.getIcmpCode()) {
+								case 0:
+									neuerEintrag[6] = "ICMP Network Unreachable";
+									break;
+								case 1:
+									neuerEintrag[6] = "ICMP Host Unreachable";
+									break;
+								default:
+									neuerEintrag[6] = "ICMP Destination Unreachable (code "
+										+ icmpPaket.getIcmpCode() + ")";
+									break;
+							}
+							break;
 						case 8:
 							neuerEintrag[6] = "ICMP Echo Request (ping)";
 							break;

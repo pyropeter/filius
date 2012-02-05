@@ -124,11 +124,7 @@ public class ICMP extends VermittlungsProtokoll implements I18n {
 					.holeWeiterleitungsZiele(zielIP);
 
 			if (route != null) {
-				try {
-					sendeUnicast(icmpPaket, route[0], route[1]);
-				} catch (VerbindungsException e) {
-					// ICMP ist optional...
-				}
+				sendeUnicast(icmpPaket, route[0], route[1]);
 			}
 		}
 	}
@@ -148,8 +144,7 @@ public class ICMP extends VermittlungsProtokoll implements I18n {
 	 *            muss
 	 * @throws VerbindungsException
 	 */
-	private void sendeUnicast(IcmpPaket paket, String gateway,
-			String schnittstelle) throws VerbindungsException {
+	private void sendeUnicast(IcmpPaket paket, String gateway, String schnittstelle) {
 		InternetKnoten knoten = (InternetKnoten)holeSystemSoftware().getKnoten();
 		NetzwerkInterface nic = knoten.getNetzwerkInterfaceByIp(schnittstelle);
 		String netzmaske = nic.getSubnetzMaske();
@@ -170,13 +165,10 @@ public class ICMP extends VermittlungsProtokoll implements I18n {
 	 *            das zu versendende IP-Paket
 	 * @param ziel
 	 *            die Ziel-IP
-	 * @param schnittstelle
-	 *            die Schnittstelle, ueber die das IP-Paket verschickt werden
-	 *            muss
-	 * @throws VerbindungsException
+	 * @param nic
+	 *            die Schnittstelle, ueber die das IP-Paket verschickt werden muss
 	 */
-	private void sendeUnicastLokal(IcmpPaket paket, String ziel,
-			NetzwerkInterface nic) throws VerbindungsException {
+	private void sendeUnicastLokal(IcmpPaket paket, String ziel, NetzwerkInterface nic) {
 		InternetKnotenBetriebssystem bs =
 				(InternetKnotenBetriebssystem)holeSystemSoftware();
 		String zielMacAdresse = bs.holeARP().holeARPTabellenEintrag(ziel);
@@ -187,12 +179,14 @@ public class ICMP extends VermittlungsProtokoll implements I18n {
 			bs.holeEthernet().senden(paket, nic.getMac(), zielMacAdresse,
 					EthernetFrame.IP);
 		} else {
-			// Es konnte keine MAC-Adresse fuer den Zielknoten
-			// bzw. fuer das Gateway bestimmt werden
-			throw new VerbindungsException(messages.getString("sw_ip_msg1")
-					+ " " + paket.getZielIp() + " " + messages.getString("sw_ip_msg2")
-					+ " " + zielMacAdresse + " " + messages.getString("sw_ip_msg3")
-					+ " " + ziel);
+			// Es konnte keine MAC-Adresse bestimmt werden.
+			// Falls das weiterzuleitende Paket ein ICMP Echo Request ist,
+			// muss ein ICMP Destination Unreachable: Host Unreachable (3/1)
+			// zurueckgesendet werden. Andere ICMP-Paket muessen verworfen
+			// werden.
+			if (paket.getIcmpType() == 8 && paket.getIcmpCode() == 0) {
+				sendeICMP(3, 1, paket.getSeqNr(), paket.getQuellIp());
+			}
 		}
 	}
 
@@ -209,8 +203,7 @@ public class ICMP extends VermittlungsProtokoll implements I18n {
 	 * @param icmpPaket
 	 *            das zu versendende ICMP-Paket
 	 */
-	public void weiterleitenPaket(IcmpPaket icmpPaket) throws VerbindungsException {
-		Main.debug.println("INVOKED ("+this.hashCode()+") "+getClass()+" (ICMP), weiterleitenPaket("+icmpPaket.toString()+")");
+	public void weiterleitenPaket(IcmpPaket icmpPaket) {
 		String gateway;
 		String schnittstelle;
 		String[] routingEintrag;
@@ -224,31 +217,33 @@ public class ICMP extends VermittlungsProtokoll implements I18n {
 			gateway = routingEintrag[0];
 			schnittstelle = routingEintrag[1];
 
-			// Wenn das Paket fuer diesen Rechner ist, wird das Paket
-			// weiterverarbeitet
 			if (schnittstelle.equals(IP.LOCALHOST)
 					&& icmpPaket.getIcmpType() == 8) {
-				// Antwort senden
+				// Paket wurde an diesen Rechner gesendet.
+				// Antwort senden:
 				sendEchoReply(icmpPaket);
-			}
-			// Damit Pakete nicht in Zyklen gesendet werden
-			// wird hier die TTL ueberprueft.
-			// TTL wird dekrementiert beim Empfang eines Pakets
-			else if (icmpPaket.getTtl() > 0) {
+			} else if (icmpPaket.getTtl() > 0) {
+				// TTL ist noch nicht abgelaufen.
+				// (wird in ICMPThread.verarbeiteDatenEinheit()
+				// dekrementiert, bevor diese Funktion aufgerufen
+				// wird)
+				// Paket weiterleiten:
 				sendeUnicast(icmpPaket, gateway, schnittstelle);
-			}
-			else {
-				// TTL abgelaufen.
-				// ICMP 11/0 Timeout Expired In Transit zuruecksenden
+			} else {
+				// TTL ist abgelaufen.
+				// ICMP Timeout Expired In Transit (11/0) zuruecksenden:
 				sendeICMP(11, 0, icmpPaket.getSeqNr(), icmpPaket.getQuellIp());
 			}
-		}
-		else {
-			bs.benachrichtigeBeobacher(messages.getString("sw_ip_msg4")
-					+ " \"" + bs.getKnoten().getName() + "\"!\n"
-					+ messages.getString("sw_ip_msg5") + " "
-					+ icmpPaket.getZielIp() + " "
-					+ messages.getString("sw_ip_msg6"));
+		} else {
+			// Es wurde keine Route gefunden, ueber die das Paket weitergeleitet
+			// werden koennte.
+			// Falls das weiterzuleitende Paket ein ICMP Echo Request ist,
+			// muss ein ICMP Destination Unreachable: Network Unreachable (3/0)
+			// zurueckgesendet werden. Andere ICMP-Paket muessen verworfen
+			// werden.
+			if (icmpPaket.getIcmpType() == 8 && icmpPaket.getIcmpCode() == 0) {
+				sendeICMP(3, 0, icmpPaket.getSeqNr(), icmpPaket.getQuellIp());
+			}
 		}
 	}
 	
