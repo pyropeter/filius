@@ -299,7 +299,11 @@ public class IP extends VermittlungsProtokoll implements I18n {
 	 *            das zu versendende IP-Paket
 	 */
 	public void weiterleitenPaket(IpPaket paket) {
-		if (paket.getTtl() <= 0) {
+		if (paket.getEmpfaenger().equals("255.255.255.255")) {
+			// Broadcast, darf nicht weitergeleitet werden.
+			// Lokal verarbeiten:
+			benachrichtigeTransportschicht(paket);
+		} else if (paket.getTtl() <= 0) {
 			// TTL ist abgelaufen.
 			// (wird in IPThread.verarbeiteDatenEinheit()
 			// dekrementiert, bevor diese Funktion aufgerufen
@@ -308,10 +312,6 @@ public class IP extends VermittlungsProtokoll implements I18n {
 			InternetKnotenBetriebssystem bs =
 				(InternetKnotenBetriebssystem) holeSystemSoftware();
 			bs.holeICMP().sendeICMP(11, 0, paket.getSender());
-		} else if (paket.getEmpfaenger().equals("255.255.255.255")) {
-			// Broadcast, darf nicht weitergeleitet werden.
-			// Lokal verarbeiten:
-			benachrichtigeTransportschicht(paket);
 		} else {
 			// TTL ist nicht abgelaufen.
 			// Paket weiterleiten:
