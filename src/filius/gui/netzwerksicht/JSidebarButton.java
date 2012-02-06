@@ -54,6 +54,8 @@ public class JSidebarButton extends JLabel implements Observer {
 
 	private boolean modemVerbunden = false;
 
+	private String[] textLines;
+
 	public boolean isSelektiert() {
 		return selektiert;
 	}
@@ -76,17 +78,39 @@ public class JSidebarButton extends JLabel implements Observer {
 	}
 
 	public JSidebarButton(String text, Icon icon, String hardwareTyp) {
-		super(text, icon, JLabel.CENTER);
+		super("", icon, JLabel.CENTER);
+		setText(text);
 
 		this.setVerticalTextPosition(SwingConstants.BOTTOM);
 		this.setHorizontalTextPosition(SwingConstants.CENTER);
 		this.hardwareTyp = hardwareTyp;
 	}
 
-	public int getWidth() {
-		int width;
+	public void setText(String text) {
+		textLines = text.split("\n");
 
-		width = this.getFontMetrics(this.getFont()).stringWidth(this.getText());
+		String html = "<html>";
+		for (int i = 0; i < textLines.length; i++) {
+			if (i > 0) {
+				html = html + "<br>";
+			}
+			html = html + textLines[i];
+		}
+		System.out.println("txt: " + html);
+		super.setText(html);
+	}
+
+	public int getWidth() {
+		int width = 0;
+		int tmp;
+
+		for (int i = 0; i < textLines.length; i++) {
+			tmp = this.getFontMetrics(this.getFont()).stringWidth(textLines[i]);
+			if (tmp > width) {
+				width = tmp;
+			}
+		}
+
 		width += 15;
 		if (this.getIcon() != null && this.getIcon().getIconWidth() > width)
 			width = this.getIcon().getIconWidth();
@@ -98,16 +122,13 @@ public class JSidebarButton extends JLabel implements Observer {
 		int height;
 
 		height = this.getFontMetrics(this.getFont()).getHeight();
+		height = height * textLines.length;
+
 		if (this.getIcon() != null) {
 			height += this.getIcon().getIconHeight();
 		}
-		else {
-//			Main.debug.println("DEBUG ("+this.hashCode()+"), getHeight(): add 80 to height");
-//			height+=80;
-		}
 		height += 10;
 
-//		Main.debug.println("DEBUG ("+this.hashCode()+"), getHeight="+height);
 		return height;
 	}
 

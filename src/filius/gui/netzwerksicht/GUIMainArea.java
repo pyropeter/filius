@@ -82,7 +82,7 @@ public class GUIMainArea extends JBackgroundPanel implements Serializable {
 			tempKnoten.addObserver(templabel);
 			tempKnoten.getSystemSoftware().addObserver(templabel);
 
-			templabel.setText(tempKnoten.getName());
+			templabel.setText(tempKnoten.getDisplayName());
 			templabel.setHardwareTyp(tempKnoten.holeHardwareTyp());
 			if (tempitem.getKnoten() instanceof Switch) {
 				if(((Switch)tempitem.getKnoten()).isCloud())

@@ -53,8 +53,26 @@ public abstract class InternetKnoten extends Knoten {
 		return null;
 	}
 
+	public String getDisplayName() {
+		if (!this.getName().trim().equals("")) {
+			return this.getName();
+		}
 
-    /**
+		// Java hat kein String-join(). HAHAHA
+		String res = "";
+		ListIterator<NetzwerkInterface> iter = getNetzwerkInterfaces().listIterator();
+		while(iter.hasNext()){
+			NetzwerkInterface nic = (NetzwerkInterface)iter.next();
+			res = res + nic.getIp();
+			if (iter.hasNext()) {
+				res = res + "\n";
+			}
+		}
+		return res;
+	}
+
+
+	/**
 	 *
 	 * Gibt das NetzwerkInterface zurueck, dass die angegebene mac Adresse hat.
 	 * Falls kein Interface diese Mac-Adresse besitzt, wird null zurueckgegeben.
@@ -116,19 +134,19 @@ public abstract class InternetKnoten extends Knoten {
 
 	public int holeAnzahlAnschluesse() {
 		return netzwerkInterfaces.size();
-    }
+	}
 
 	public void hinzuAnschluss() {
 		netzwerkInterfaces.add(new NetzwerkInterface());
 	}
 	
-    public void setzeAnzahlAnschluesse(int anzahlAnschluesse) {
+	public void setzeAnzahlAnschluesse(int anzahlAnschluesse) {
 		Main.debug.println("INVOKED ("+this.hashCode()+") "+getClass()+" (InternetKnoten), setzeAnzahlAnschluesse("+anzahlAnschluesse+")");
 
-        netzwerkInterfaces = new LinkedList<NetzwerkInterface>();
-        for (int i=0;i<anzahlAnschluesse;i++)
-        {
-        	netzwerkInterfaces.add(new NetzwerkInterface());
-        }
-    }
+		netzwerkInterfaces = new LinkedList<NetzwerkInterface>();
+		for (int i=0;i<anzahlAnschluesse;i++)
+		{
+			netzwerkInterfaces.add(new NetzwerkInterface());
+		}
+	}
 }

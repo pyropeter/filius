@@ -33,21 +33,25 @@ public abstract class Knoten extends Hardware {
 
 	private String name; // name der Hardware
 
-    private SystemSoftware systemAnwendung; //je nach Art der Hardware ist dies ein Betriebssystem oder eine Firmware
+	private SystemSoftware systemAnwendung; //je nach Art der Hardware ist dies ein Betriebssystem oder eine Firmware
 
-    public abstract Port holeFreienPort();
+	public abstract Port holeFreienPort();
 
 
 	public String getName() {
-        return name;
-    }
+		return name;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-        if(systemAnwendung!=null) {
-        	filius.Main.debug.println("DEBUG: node with SystemSoftware ("+systemAnwendung.hashCode()+") now has name '"+name+"'");
-        }
-    }
+	public void setName(String name) {
+		this.name = name;
+		if(systemAnwendung!=null) {
+			filius.Main.debug.println("DEBUG: node with SystemSoftware ("+systemAnwendung.hashCode()+") now has name '"+name+"'");
+		}
+	}
+
+	public String getDisplayName() {
+		return getName();
+	}
 
 	public SystemSoftware getSystemSoftware() {
 		return systemAnwendung;
