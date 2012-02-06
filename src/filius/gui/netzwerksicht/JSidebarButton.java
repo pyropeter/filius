@@ -96,7 +96,6 @@ public class JSidebarButton extends JLabel implements Observer {
 			}
 			html = html + textLines[i];
 		}
-		System.out.println("txt: " + html);
 		super.setText(html);
 	}
 
