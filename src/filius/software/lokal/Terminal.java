@@ -763,7 +763,7 @@ public class Terminal extends ClientAnwendung implements I18n {
 			benachrichtigeBeobachter("\n\n" + args[0] + " scheint seeehr weit weg zu sein.");
 		} else if (interrupted) {
 			benachrichtigeBeobachter("\n\noh, ich wurde interrupted :(");
-		} else if (recv.getIcmpType() == 3) {
+		} else if (recv != null && recv.getIcmpType() == 3) {
 			switch (recv.getIcmpCode()) {
 				case 0:
 					benachrichtigeBeobachter("\n\nFehler: ICMP Network Unreachable von "
