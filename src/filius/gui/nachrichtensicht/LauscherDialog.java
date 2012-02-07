@@ -110,7 +110,7 @@ public class LauscherDialog extends JDialog implements I18n {
 			panel.add(scrollPane, BorderLayout.CENTER);
 
 
-			tabbedPane.add(system.getKnoten().getName(), panel);
+			tabbedPane.add(system.getKnoten().getDisplayName(), panel);
 
 			tabbedPane.setSelectedComponent(panel);
 

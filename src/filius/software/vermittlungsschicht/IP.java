@@ -268,6 +268,11 @@ public class IP extends VermittlungsProtokoll implements I18n {
 	 * @throws VerbindungsException
 	 */
 	public void senden(String zielIp, int protokoll, int ttl, Object segment) {
+		String quellIp = ((InternetKnotenBetriebssystem)
+					holeSystemSoftware()).holeIPAdresse();
+		senden(zielIp, quellIp, protokoll, ttl, segment);
+	}
+	public void senden(String zielIp, String quellIp, int protokoll, int ttl, Object segment) {
 		IpPaket paket = new IpPaket();
 		paket.setEmpfaenger(zielIp);
 		paket.setProtocol(protokoll);
@@ -275,10 +280,7 @@ public class IP extends VermittlungsProtokoll implements I18n {
 		paket.setSegment(segment);
 
 		if (zielIp.equals("255.255.255.255")) {
-			// dummer hack: broadcasts gehen immer nur in das Netz
-			// des ersten NICs
-			paket.setSender(((InternetKnotenBetriebssystem)
-						holeSystemSoftware()).holeIPAdresse());
+			paket.setSender(quellIp);
 			sendeBroadcast(paket);
 		} else {
 			sendeUnicast(paket, true);

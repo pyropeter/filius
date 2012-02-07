@@ -159,13 +159,17 @@ public abstract class TransportProtokoll extends Protokoll implements I18n,
 	 *            Segment mit Daten zur IP-Schicht
 	 */
 	protected void senden(String zielIp, Object segment) {
+		senden(zielIp, null, segment);
+	}
+
+	protected void senden(String zielIp, String quellIp, Object segment) {
 		Main.debug.println("INVOKED ("+this.hashCode()+") "+getClass()+" (TransportProtokoll), senden("+zielIp+","+segment+")");
 //		Main.debug.println(getClass().toString()
 //				+ "\n\tsenden() wurde aufgerufen" + "\n\tZiel-Adresse: "
 //				+ zielIp + ":" + ((Segment) segment).getZielPort()
 //				+ "\n\tDaten: " + ((Segment) segment).getDaten());
 
-		segmentListe.addLast((new Object[] { zielIp, segment }));
+		segmentListe.addLast((new Object[] { zielIp, quellIp, segment }));
 		synchronized (segmentListe) {
 			segmentListe.notifyAll();
 		}
@@ -189,8 +193,8 @@ public abstract class TransportProtokoll extends Protokoll implements I18n,
 
 					temp = (Object[]) segmentListe.removeFirst();
 					bs = (InternetKnotenBetriebssystem) holeSystemSoftware();
-					bs.holeIP().senden((String) temp[0], holeTyp(), TTL,
-							temp[1]);
+					bs.holeIP().senden((String) temp[0], (String) temp[1],
+							holeTyp(), TTL, temp[2]);
 				}
 			}
 		}

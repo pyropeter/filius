@@ -62,6 +62,8 @@ public abstract class Socket implements SocketSchnittstelle, I18n {
 	/** der lokal belegte Port */
 	protected int lokalerPort = -1;
 
+	protected String quellIp;
+
 	/**
 	 * die IP-Adresse des Knotens, auf dem der entfernte Socket bereitgestellt
 	 * wird
@@ -191,7 +193,7 @@ public abstract class Socket implements SocketSchnittstelle, I18n {
 	 */
 	protected void sende(Segment segment) {
 		Main.debug.println("INVOKED ("+this.hashCode()+") "+getClass()+" (Socket), sende("+segment+")");
-		protokoll.senden(zielIp, segment);
+		protokoll.senden(zielIp, quellIp, segment);
 	}
 
 	/**
@@ -287,6 +289,10 @@ public abstract class Socket implements SocketSchnittstelle, I18n {
 	
 	public int holeLokalenPort() {
 		return lokalerPort;
+	}
+
+	public void bind(String quellIp) {
+		this.quellIp = quellIp;
 	}
 	
 	public abstract String getStateAsString();

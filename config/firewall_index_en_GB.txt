@@ -6,6 +6,8 @@
 
 <p> <a href="konfig.html">Configuration</a> </p>
 <p> <a href="log.html">Show Log</a> </p>
+<p> <a href="routes.html">Show dynamic routes</a> </p>
 
 </body>
 </html>
+

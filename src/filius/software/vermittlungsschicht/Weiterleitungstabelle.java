@@ -35,6 +35,8 @@ import filius.hardware.knoten.InternetKnoten;
 import filius.rahmenprogramm.I18n;
 import filius.software.system.InternetKnotenBetriebssystem;
 import filius.software.vermittlungsschicht.IP;
+import filius.software.rip.RIPTable;
+import filius.software.rip.RIPRoute;
 
 /**
  * Mit dieser Klasse wird die Weiterleitungstabelle implementiert. Es werden
@@ -292,6 +294,17 @@ public class Weiterleitungstabelle implements I18n {
 	 *         Schnittstelle
 	 */
 	public String[] holeWeiterleitungsZiele(String zielStr) {
+		RIPTable table = firmware.getRIPTable();
+		if (table == null) {
+			return holeStatisch(zielStr);
+		} else {
+			synchronized (table) {
+				return holeDynamisch(table, zielStr);
+			}
+		}
+	}
+
+	public String[] holeStatisch(String zielStr) {
 		long netAddr, maskAddr, zielAddr = IP.inetAton(zielStr);
 		String[] route;
 
@@ -309,6 +322,29 @@ public class Weiterleitungstabelle implements I18n {
 			if (netAddr == (maskAddr & zielAddr)) {
 				bestMask = maskAddr;
 				bestRoute = new String[]{route[2], route[3]};
+			}
+		}
+		return bestRoute;
+	}
+
+	public String[] holeDynamisch(RIPTable table, String ip) {
+		// table must be synchronized by holeWeiterleitungsZiele
+
+		String[] bestRoute = null;
+		int bestHops = RIPTable.INFINITY - 1;
+		long bestMask = -1;
+
+		for (RIPRoute route : table.routes) {
+			if (route.netAddr.equals(berechneNetzkennung(ip, route.netMask))) {
+				if (bestHops < route.hops) {
+					continue;
+				}
+				if (bestHops > route.hops
+				|| bestMask < IP.inetAton(route.netMask)) {
+					bestRoute = new String[]{route.nextHop, route.nic};
+					bestHops = route.hops;
+					bestMask = IP.inetAton(route.netMask);
+				}
 			}
 		}
 		return bestRoute;

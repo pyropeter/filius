@@ -46,6 +46,7 @@ import filius.software.vermittlungsschicht.ARP;
 import filius.software.vermittlungsschicht.ICMP;
 import filius.software.vermittlungsschicht.IP;
 import filius.software.vermittlungsschicht.Weiterleitungstabelle;
+import filius.software.rip.RIPTable;
 
 /**
  * Diese Klasse implementiert die Funktionalitaet eines Betriebssystems für
@@ -348,6 +349,10 @@ public abstract class InternetKnotenBetriebssystem extends SystemSoftware {
 	 */
 	public void setDateisystem(Dateisystem dateisystem) {
 		this.dateisystem = dateisystem;
+	}
+
+	public RIPTable getRIPTable() {
+		return null;
 	}
 
 	/**

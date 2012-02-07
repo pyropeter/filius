@@ -101,6 +101,7 @@ public class JVermittlungsrechnerKonfiguration extends JKonfiguration implements
 	private JTextField[] macAdressen;
 
 	private JTextField gateway;
+	private JCheckBox rip;
 
 	private JLabel[] verbundeneKomponente;
 
@@ -177,13 +178,14 @@ public class JVermittlungsrechnerKonfiguration extends JKonfiguration implements
 		ListIterator it;
 		Vermittlungsrechner vRechner;
 		NetzwerkInterface nic;
-		InternetKnotenBetriebssystem bs;
+		VermittlungsrechnerBetriebssystem bs;
 
 		vRechner = (Vermittlungsrechner) holeHardware();
-		bs = (InternetKnotenBetriebssystem) vRechner.getSystemSoftware();
+		bs = (VermittlungsrechnerBetriebssystem) vRechner.getSystemSoftware();
 
 		vRechner.setName(name.getText());
 		bs.setStandardGateway(gateway.getText());
+		bs.setRip(rip.isSelected());
 
 		it = vRechner.getNetzwerkInterfaces().listIterator();
 		for (int i = 0; it.hasNext(); i++) {
@@ -340,6 +342,25 @@ public class JVermittlungsrechnerKonfiguration extends JKonfiguration implements
 		vBox.add(tempBox);
 		vBox.add(Box.createVerticalStrut(5));
 
+		// Attribut rip
+		tempBox = Box.createHorizontalBox();
+		tempBox.setMaximumSize(new Dimension(400, 20));
+
+		tempLabel = new JLabel("Enable RIP?");
+		tempLabel.setPreferredSize(new Dimension(140, 10));
+		tempLabel.setVisible(true);
+		tempLabel.setAlignmentX(Component.RIGHT_ALIGNMENT);
+		tempBox.add(tempLabel);
+		tempBox.add(Box.createHorizontalStrut(10));
+
+		rip = new JCheckBox();
+		rip.addActionListener(actionListener);
+		rip.addFocusListener(focusListener);
+		tempBox.add(rip);
+
+		vBox.add(tempBox);
+		vBox.add(Box.createVerticalStrut(5));
+
 		btFirewall = new JButton(messages
 				.getString("jvermittlungsrechnerkonfiguration_msg4"));
 
@@ -359,7 +380,8 @@ public class JVermittlungsrechnerKonfiguration extends JKonfiguration implements
 			}
 		});
 		vBox.add(changeBasicSettingsButton);
-		
+
+
 		// NIC tabs
 		tpNetzwerkKarten.addTab(messages.getString("jvermittlungsrechnerkonfiguration_msg17"),
 				vBox);
@@ -387,7 +409,7 @@ public class JVermittlungsrechnerKonfiguration extends JKonfiguration implements
 							.getString("jvermittlungsrechnerkonfiguration_msg5"));
 			else verbundeneKomponente[i] = new JLabel(messages
 					.getString("jvermittlungsrechnerkonfiguration_msg6")
-					+ " " + tempKnoten.getName());
+					+ " " + tempKnoten.getDisplayName().replace("\n",", "));
 			verbundeneKomponente[i].setPreferredSize(new Dimension(400, 10));
 			boxKomponente.add(verbundeneKomponente[i]);
 
@@ -441,7 +463,7 @@ public class JVermittlungsrechnerKonfiguration extends JKonfiguration implements
 			}
 			else {
 				tpNetzwerkKarten.addTab(
-						messages.getString("jvermittlungsrechnerkonfiguration_msg10") + (i + 1),
+						tempKnoten.getDisplayName().replace("\n",", "),
 						new ImageIcon(getClass().getResource("/gfx/allgemein/conn_ok.png")),
 						boxNic);
 			}
@@ -655,7 +677,7 @@ public class JVermittlungsrechnerKonfiguration extends JKonfiguration implements
 				Verbindung connection = this.getConnectedCable(nic);
 				Port[] ports = connection.getAnschluesse();
 				for (Port port : ports) {
-					if (port.getNIC() != nic) {
+					if (port.getNIC() != null && port.getNIC() != nic) {
 						remoteAddress = port.getNIC().getIp();
 					}
 				}
@@ -665,10 +687,10 @@ public class JVermittlungsrechnerKonfiguration extends JKonfiguration implements
 				btnRemote[nicNr-1].setEnabled(false);
 				lblRemote[nicNr-1] = new JLabel();
 				if(node instanceof filius.hardware.knoten.InternetKnoten) {
-					lblRemote[nicNr-1].setText("<html>"+node.getName()+"<br>("+remoteAddress+")</html>");
+					lblRemote[nicNr-1].setText("<html>"+node.getDisplayName().replaceFirst("\n.*",", ...")+"<br>("+remoteAddress+")</html>");
 				}
 				else {
-					lblRemote[nicNr-1].setText(node.getName());
+					lblRemote[nicNr-1].setText(node.getDisplayName().replaceFirst("\n.*",", ..."));
 				}
 				foreignPanel.add(btnRemote[nicNr-1]);
 				foreignPanel.add(lblRemote[nicNr-1]);
@@ -1207,15 +1229,16 @@ public class JVermittlungsrechnerKonfiguration extends JKonfiguration implements
 		Main.debug.println("INVOKED ("+this.hashCode()+") "+getClass()+" (JVermittlungsrechnerKonfiguration), updateAttribute()");
 		ListIterator it;
 		Vermittlungsrechner vRechner;
-		InternetKnotenBetriebssystem bs;
+		VermittlungsrechnerBetriebssystem bs;
 		NetzwerkInterface nic;
 		Knoten tempKnoten;
 
 		vRechner = (Vermittlungsrechner) holeHardware();
-		bs = (InternetKnotenBetriebssystem) vRechner.getSystemSoftware();
+		bs = (VermittlungsrechnerBetriebssystem) vRechner.getSystemSoftware();
 
 		name.setText(vRechner.getName());
 		gateway.setText(bs.getStandardGateway());
+		rip.setSelected(bs.getRip());
 
 		it = vRechner.getNetzwerkInterfaces().listIterator();
 		for (int i = 0; it.hasNext() && i < ipAdressen.length; i++) {
@@ -1228,7 +1251,7 @@ public class JVermittlungsrechnerKonfiguration extends JKonfiguration implements
 					.getString("jvermittlungsrechnerkonfiguration_msg16"));
 			else verbundeneKomponente[i].setText(messages
 					.getString("jvermittlungsrechnerkonfiguration_msg6")
-					+ " " + tempKnoten.getName());
+					+ " " + tempKnoten.getDisplayName().replace("\n",", "));
 
 		}
 

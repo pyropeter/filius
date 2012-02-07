@@ -26,6 +26,7 @@
 package filius.software;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.ListIterator;
@@ -207,6 +208,7 @@ public abstract class Anwendung extends Thread {
 
 		while (true) {
 			if (running) {
+				aufruf = null;
 				synchronized (kommandos) {    // first block, then check size! (otherwise: prone to race conditions)
 					if (kommandos.size() < 1) {
 							try {
@@ -223,11 +225,11 @@ public abstract class Anwendung extends Thread {
 							}
 							//Main.debug.println(getClass() + " run()"
 									//+ "\n\tThread wurde aufgeweckt.");
+					} else {
+						aufruf = (Object[]) kommandos.removeFirst();
 					}
 				}
-				if (kommandos.size() > 0) {
-					aufruf = (Object[]) kommandos.removeFirst();
-
+				if (aufruf != null) {
 					methodenName = aufruf[0].toString();
 					args = (Object[]) aufruf[1];
 
@@ -267,8 +269,12 @@ public abstract class Anwendung extends Thread {
 									//+ klasse.toString() 
 									//+ "\n\t--> fahre fort mit Suche");
 							klasse = klasse.getSuperclass();
-						} catch (Exception e) {
+						} catch (IllegalAccessException e) {
 							e.printStackTrace(Main.debug);
+							klasse = null;
+						} catch (InvocationTargetException e) {
+							e.getCause().printStackTrace(Main.debug);
+							klasse = null;
 						}
 					}
 				}
