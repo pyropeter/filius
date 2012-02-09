@@ -24,7 +24,6 @@ public class RIPBeacon extends ClientAnwendung {
 	public void announce() {
 		VermittlungsrechnerBetriebssystem bs = (VermittlungsrechnerBetriebssystem)
 				getSystemSoftware();
-		InternetKnoten knoten = (InternetKnoten) bs.getKnoten();
 		RIPTable table = bs.getRIPTable();
 
 		UDPSocket sock;
@@ -47,7 +46,7 @@ public class RIPBeacon extends ClientAnwendung {
 				}
 
 				table.check();
-				broadcast(sock, knoten, table);
+				broadcast(sock, bs, table);
 
 				table.nextBeacon = RIPUtil.getTime()
 					+ (int)(RIPTable.INTERVAL
@@ -62,7 +61,9 @@ public class RIPBeacon extends ClientAnwendung {
 		socket.beenden();
 	}
 
-	public void broadcast(UDPSocket sock, InternetKnoten knoten, RIPTable table) {
+	public void broadcast(UDPSocket sock, VermittlungsrechnerBetriebssystem bs, RIPTable table) {
+		InternetKnoten knoten = (InternetKnoten) bs.getKnoten();
+
 		RIPMessage msg;
 		NetzwerkInterface nic;
 
@@ -70,7 +71,8 @@ public class RIPBeacon extends ClientAnwendung {
 		while (it.hasNext()) {
 			nic = (NetzwerkInterface) it.next();
 
-			msg = new RIPMessage(nic.getIp(), RIPTable.INFINITY, RIPTable.TIMEOUT);
+			msg = new RIPMessage(nic.getIp(), bs.holeIPAdresse(),
+					RIPTable.INFINITY, RIPTable.TIMEOUT);
 			for (RIPRoute route : table.routes) {
 				// split horizon:
 				if (nic.getIp().equals(route.nic)) {

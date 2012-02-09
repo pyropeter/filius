@@ -16,18 +16,26 @@ public class RIPWeb extends WebServerPlugIn {
 		html += "<title>RIP Routen</title>";
 		html += "<h1>RIP Routen</h1>";
 
-		html += "<table>";
+		html += "<table border=1>";
 		html += "<tr>";
-		html += "<th>Netz</th>";
-		html += "<th>Maske</th>";
-		html += "<th>Router</th>";
+		html += "<th colspan=2>Netz</th>";
 		html += "<th>Hops</th>";
-		html += "<th>Gueltig (sec)</th>";
+		html += "<th>Gültig</th>";
+		html += "<th colspan=2>Nächster Hop</th>";
+		html += "</tr>";
+
+		html += "<tr>";
+		html += "<th>Adresse</th>";
+		html += "<th>Maske</th>";
+		html += "<th></th>";
+		html += "<th>(sec)</th>";
+		html += "<th>privat</th>";
+		html += "<th>öffentlich</th>";
 		html += "</tr>";
 
 		synchronized (table) {
 			for (RIPRoute route : table.routes) {
-				html += "<tr>" + routeToHtml(route) + "</tr>";
+				html += routeToHtml(route);
 			}
 		}
 
@@ -41,8 +49,6 @@ public class RIPWeb extends WebServerPlugIn {
 
 		html += "<td>" + route.netAddr + "</td>";
 		html += "<td>" + route.netMask + "</td>";
-		html += "<td><a href=\"http://" + route.nextHop
-				+ "/routes.html\">" + route.nextHop + "</a></td>";
 		html += "<td>" + route.hops + "</td>";
 
 		if (route.expires == 0) {
@@ -52,6 +58,15 @@ public class RIPWeb extends WebServerPlugIn {
 			html += "<td>" + gueltig + "</td>";
 		}
 
-		return html;
+		html += "<td>" + route.nextHop + "</td>";
+		html += "<td><a href=\"http://" + route.hopPublicIp
+				+ "/routes.html\">" + route.hopPublicIp + "</a></td>";
+
+		if (route.hops == 0) {
+			return "<tr style='background-color:#aaffaa'>" + html + "</tr>";
+		} else if (route.hops == 16) {
+			return "<tr style='background-color:#ffaaaa'>" + html + "</tr>";
+		}
+		return "<tr>" + html + "</tr>";
 	}
 }

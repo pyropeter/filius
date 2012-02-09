@@ -13,16 +13,19 @@ public class RIPRoute {
 	public String netAddr;
 	public String netMask;
 	public String nextHop;
+	public String hopPublicIp; // hint for system administrator
 	public String nic;
 
 	public RIPRoute(int timeout, String netAddr, String netMask,
-			String nextHop, String nic, int hops) {
+			String nextHop, String hopPublicIp,
+			String nic, int hops) {
 		this.created = RIPUtil.getTime();
 		refresh(timeout);
 
 		this.netAddr = netAddr;
 		this.netMask = netMask;
 		this.nextHop = nextHop;
+		this.hopPublicIp = hopPublicIp;
 		this.nic = nic;
 		this.hops = hops;
 	}

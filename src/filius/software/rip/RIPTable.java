@@ -1,6 +1,7 @@
 package filius.software.rip;
 
 import filius.software.vermittlungsschicht.IP;
+import filius.software.system.InternetKnotenBetriebssystem;
 import filius.hardware.NetzwerkInterface;
 import filius.hardware.knoten.InternetKnoten;
 
@@ -16,7 +17,10 @@ public class RIPTable {
 
 	public long nextBeacon;
 
-	public RIPTable() {
+	private InternetKnotenBetriebssystem bs;
+
+	public RIPTable(InternetKnotenBetriebssystem bs) {
+		this.bs = bs;
 		reset();
 	}
 
@@ -40,7 +44,7 @@ public class RIPTable {
 			netAddr = IP.inetAton(nic.getIp()) & netMask;
 
 			addRoute(new RIPRoute(0, IP.inetNtoa(netAddr), IP.inetNtoa(netMask),
-						nic.getIp(), nic.getIp(), 0));
+						nic.getIp(), bs.holeIPAdresse(), nic.getIp(), 0));
 		}
 	}
 

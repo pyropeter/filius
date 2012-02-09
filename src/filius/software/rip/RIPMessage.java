@@ -7,13 +7,15 @@ import java.util.ListIterator;
 
 public class RIPMessage {
 	public String ip;
+	public String publicIp;
 	public int infinity;
 	public int timeout;
 
 	public LinkedList<RIPMessageRoute> routes;
 
-	public RIPMessage(String ip, int infinity, int timeout) {
+	public RIPMessage(String ip, String publicIp, int infinity, int timeout) {
 		this.ip = ip;
+		this.publicIp = publicIp;
 		this.infinity = infinity;
 		this.timeout = timeout;
 
@@ -25,19 +27,21 @@ public class RIPMessage {
 
 		try {
 			ip = IP.ipCheck(lines[0]);
-			infinity = Integer.parseInt(lines[1]);
-			timeout = Integer.parseInt(lines[2]);
+			publicIp = IP.ipCheck(lines[1]);
+			infinity = Integer.parseInt(lines[2]);
+			timeout = Integer.parseInt(lines[3]);
 		} catch (IndexOutOfBoundsException e) {
 			throw new IllegalArgumentException();
 		}
 
-		if (ip == null || timeout <= 0 || infinity <= 0) {
+		if (ip == null || publicIp == null || timeout <= 0
+				|| infinity <= 0) {
 			throw new IllegalArgumentException();
 		}
 
 		routes = new LinkedList<RIPMessageRoute>();
 
-		for (int i = 3; i < lines.length; i++) {
+		for (int i = 4; i < lines.length; i++) {
 			routes.add(new RIPMessageRoute(lines[i]));
 		}
 	}
@@ -45,6 +49,7 @@ public class RIPMessage {
 	public String toString() {
 		String res = "";
 		res += ip + "\n";
+		res += publicIp + "\n";
 		res += infinity + "\n";
 		res += timeout;
 

@@ -52,6 +52,7 @@ public class RIPServerMitarbeiter extends ServerMitarbeiter {
 					if (route.hops > hops) {
 						// found a shorter route
 						route.nextHop = msg.ip;
+						route.hopPublicIp = msg.publicIp;
 						route.nic = msgRoute[0];
 					} else if (route.hops < hops) {
 						// the old route just got worse. this has to be
@@ -64,7 +65,7 @@ public class RIPServerMitarbeiter extends ServerMitarbeiter {
 					// route is unknown, create it
 					if (hops < RIPTable.INFINITY) {
 						route = new RIPRoute(msg.timeout, entry.ip, entry.mask,
-								msg.ip, msgRoute[0], hops);
+								msg.ip, msg.publicIp, msgRoute[0], hops);
 						table.addRoute(route);
 					}
 				}

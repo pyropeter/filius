@@ -114,7 +114,7 @@ public class VermittlungsrechnerBetriebssystem extends
 		server.erzeugeIndexDatei(Information.getInformation().getProgrammPfad() + "config/firewall_index_"+Information.getInformation().getLocale()+".txt");
 
 		// ------------- RIP ------------------
-		riptable = new RIPTable();
+		riptable = new RIPTable(this);
 		ripserver = new RIPServer();
 		ripserver.setSystemSoftware(this);
 		ripbeacon = new RIPBeacon();
