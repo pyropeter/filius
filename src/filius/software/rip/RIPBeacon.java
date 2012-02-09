@@ -1,6 +1,7 @@
 package filius.software.rip;
 
 import java.util.ListIterator;
+import java.util.Random;
 
 import filius.exception.VerbindungsException;
 import filius.software.clientserver.ClientAnwendung;
@@ -10,8 +11,12 @@ import filius.hardware.NetzwerkInterface;
 import filius.hardware.knoten.InternetKnoten;
 
 public class RIPBeacon extends ClientAnwendung {
+	private Random rand;
+
 	public void starten() {
 		super.starten();
+
+		rand = new Random();
 
 		ausfuehren("announce", null);
 	}
@@ -40,9 +45,13 @@ public class RIPBeacon extends ClientAnwendung {
 					} catch (InterruptedException e) { }
 					continue;
 				}
+
 				table.check();
 				broadcast(sock, knoten, table);
-				table.nextBeacon = RIPUtil.getTime() + RIPTable.INTERVAL;
+
+				table.nextBeacon = RIPUtil.getTime()
+					+ (int)(RIPTable.INTERVAL
+					* (rand.nextFloat()/3 + 0.84));
 			}
 
 			try {
