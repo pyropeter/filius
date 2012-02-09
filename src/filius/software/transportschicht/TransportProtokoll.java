@@ -169,8 +169,8 @@ public abstract class TransportProtokoll extends Protokoll implements I18n,
 //				+ zielIp + ":" + ((Segment) segment).getZielPort()
 //				+ "\n\tDaten: " + ((Segment) segment).getDaten());
 
-		segmentListe.addLast((new Object[] { zielIp, quellIp, segment }));
 		synchronized (segmentListe) {
+			segmentListe.addLast((new Object[] { zielIp, quellIp, segment }));
 			segmentListe.notifyAll();
 		}
 	}
@@ -190,7 +190,6 @@ public abstract class TransportProtokoll extends Protokoll implements I18n,
 					}
 				}
 				if (segmentListe.size() > 0) {
-
 					temp = (Object[]) segmentListe.removeFirst();
 					bs = (InternetKnotenBetriebssystem) holeSystemSoftware();
 					bs.holeIP().senden((String) temp[0], (String) temp[1],
