@@ -615,20 +615,28 @@ public abstract class InternetKnotenBetriebssystem extends SystemSoftware {
 	 * Das ist eine Methode des Entwurfsmusters Fassade
 	 */
 	public String holeIPAdresse() {
-		Main.debug.println("INVOKED ("+this.hashCode()+") "+getClass()+" (InternetKnotenBetriebssystem), holeIPAdresse()");
-		InternetKnoten knoten;
+		if (!(getKnoten() instanceof InternetKnoten)) {
+			return null;
+		}
+		InternetKnoten knoten = (InternetKnoten) getKnoten();
 
-		if (getKnoten() instanceof InternetKnoten) {
-			knoten = (InternetKnoten) getKnoten();
+		String ip = null;
+		NetzwerkInterface nic;
+		ListIterator it = knoten.getNetzwerkInterfaces().listIterator();
+		while (it.hasNext()) {
+			nic = (NetzwerkInterface) it.next();
+			ip = nic.getIp();
 
-			if (knoten.getNetzwerkInterfaces().size() > 0) {
-				NetzwerkInterface nic = (NetzwerkInterface) knoten
-						.getNetzwerkInterfaces().getFirst();
-				return nic.getIp();
+			// search for a public IP
+			if (		!( ip.startsWith("10.")
+					|| ip.startsWith("192.168.")
+					|| ip.startsWith("0.")
+					|| ip.startsWith("127."))) {
+				break;
 			}
 		}
 
-		return null;
+		return ip;
 	}
 
 	/**
