@@ -268,9 +268,7 @@ public class IP extends VermittlungsProtokoll implements I18n {
 	 * @throws VerbindungsException
 	 */
 	public void senden(String zielIp, int protokoll, int ttl, Object segment) {
-		String quellIp = ((InternetKnotenBetriebssystem)
-					holeSystemSoftware()).holeIPAdresse();
-		senden(zielIp, quellIp, protokoll, ttl, segment);
+		senden(zielIp, null, protokoll, ttl, segment);
 	}
 	public void senden(String zielIp, String quellIp, int protokoll, int ttl, Object segment) {
 		IpPaket paket = new IpPaket();
@@ -280,6 +278,10 @@ public class IP extends VermittlungsProtokoll implements I18n {
 		paket.setSegment(segment);
 
 		if (zielIp.equals("255.255.255.255")) {
+			if (quellIp == null) {
+				quellIp = ((InternetKnotenBetriebssystem)
+						holeSystemSoftware()).holeIPAdresse();
+			}
 			paket.setSender(quellIp);
 			sendeBroadcast(paket);
 		} else {
