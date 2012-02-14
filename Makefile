@@ -25,7 +25,8 @@ build:	Makefile.depends $(LIBS) $(OBJS)
 	javac -classpath $(CLASSPATH):src $<
 
 clean:
-	$(RM) $(OBJS) Makefile.depends
+	$(RM) Makefile.depends
+	find src/ -type f -name '*.class' -delete
 
 lib/jna.jar:
 	mkdir -p lib
