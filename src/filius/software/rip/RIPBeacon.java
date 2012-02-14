@@ -58,7 +58,7 @@ public class RIPBeacon extends ClientAnwendung {
 			} catch (InterruptedException e) {}
 		}
 
-		socket.beenden();
+		sock.beenden();
 	}
 
 	public void broadcast(UDPSocket sock, VermittlungsrechnerBetriebssystem bs, RIPTable table) {
