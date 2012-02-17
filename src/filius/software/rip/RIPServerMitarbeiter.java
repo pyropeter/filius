@@ -1,6 +1,7 @@
 package filius.software.rip;
 
 import filius.software.clientserver.ServerMitarbeiter;
+import filius.software.vermittlungsschicht.IP;
 import filius.software.transportschicht.Socket;
 import filius.software.transportschicht.UDPSocket;
 import filius.software.system.VermittlungsrechnerBetriebssystem;
@@ -12,10 +13,12 @@ import java.util.ListIterator;
 public class RIPServerMitarbeiter extends ServerMitarbeiter {
 	private RIPTable table;
 	private VermittlungsrechnerBetriebssystem bs;
+	private InternetKnoten knoten;
 
 	public RIPServerMitarbeiter(RIPServer server, Socket socket) {
 		super(server, socket);
 		bs = (VermittlungsrechnerBetriebssystem) server.getSystemSoftware();
+		knoten = (InternetKnoten) bs.getKnoten();
 		table = bs.getRIPTable();
 	}
 
@@ -28,8 +31,8 @@ public class RIPServerMitarbeiter extends ServerMitarbeiter {
 		}
 
 		// find the interface that (probably) received the message
-		String[] msgRoute = bs.getWeiterleitungstabelle().holeStatisch(msg.ip);
-		if (msgRoute == null || !msgRoute[0].equals(msgRoute[1])) {
+		String nicIp = findeInterfaceIp(msg.ip);
+		if (nicIp == null || nicIp.equals(msg.ip)) {
 			return;
 		}
 
@@ -53,7 +56,7 @@ public class RIPServerMitarbeiter extends ServerMitarbeiter {
 						// found a shorter route
 						route.nextHop = msg.ip;
 						route.hopPublicIp = msg.publicIp;
-						route.nic = msgRoute[0];
+						route.nic = nicIp;
 					} else if (route.hops < hops) {
 						// the old route just got worse. this has to be
 						// flushed to other routers immediately
@@ -65,7 +68,7 @@ public class RIPServerMitarbeiter extends ServerMitarbeiter {
 					// route is unknown, create it
 					if (hops < RIPTable.INFINITY) {
 						route = new RIPRoute(msg.timeout, entry.ip, entry.mask,
-								msg.ip, msg.publicIp, msgRoute[0], hops);
+								msg.ip, msg.publicIp, nicIp, hops);
 						table.addRoute(route);
 					}
 				}
@@ -77,5 +80,21 @@ public class RIPServerMitarbeiter extends ServerMitarbeiter {
 			// the beacon:
 			table.notifyAll();
 		}
+	}
+
+	String findeInterfaceIp(String ipStr) {
+		long ip = IP.inetAton(ipStr);
+		ListIterator it = knoten.getNetzwerkInterfaces().listIterator();
+
+		while (it.hasNext()) {
+			NetzwerkInterface nic = (NetzwerkInterface) it.next();
+			long netMask = IP.inetAton(nic.getSubnetzMaske());
+			long netAddr = IP.inetAton(nic.getIp()) & netMask;
+
+			if ((ip & netMask) == netAddr) {
+				return nic.getIp();
+			}
+		}
+		return null;
 	}
 }
