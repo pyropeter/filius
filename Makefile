@@ -30,7 +30,7 @@ clean:
 
 lib/jna.jar:
 	mkdir -p lib
-	wget -O lib/jna.jar 'https://github.com/downloads/twall/jna/jna.jar'
+	wget -O lib/jna.jar 'https://maven.java.net/content/repositories/releases/net/java/dev/jna/jna/3.5.1/jna-3.5.1.jar'
 
 lib/htmlparser.zip:
 	mkdir -p lib
